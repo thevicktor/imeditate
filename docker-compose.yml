@@ -32,6 +32,10 @@ services:
     environment:
       DATABASE_URL: postgres://imeditate:imeditate_dev_only@postgres:5432/imeditate
       PORT: "3000"
+      MEDIA_DIR: /app/media
+    volumes:
+      - media:/app/media
 
 volumes:
   pgdata:
+  media:
