@@ -274,3 +274,63 @@ These choices serve the PRD's constraints: real-family testing on phones and tab
 | **No Supabase, no Vercel** | Deliberately excluded | Keeps the stack free, self-contained, and under our control while testing with families |
 
 Every other service follows the same free-first rule: our own analytics table instead of a vendor, free crash reporting, and store releases only — so Version 1 needs no paid service at all.
+
+# **16\. Design System**
+
+This is the authored design. Tokens never change across ages; only wording and the Soldier's illustration flex. Reference files: `design/tokens.json`, `design/showcase.html`.
+
+## **16\.1\. Colour**
+
+Seven colours, each with one job.
+
+| Colour | Value | Job |
+| :---- | :---- | :---- |
+| **Deep navy** | #0F1E3D | Base ground. Home, Ponder, Mutter, app chrome. |
+| **Signal red** | #B3202A | The Roar screen and celebration only. Never an action. |
+| **Ember Amber** | #D9772E | Every primary action: I'm a parent, Add child, Let's go, Start, Continue, Subscribe, Declare it. |
+| **Ember gold** | #F4B942 | Rank, jewels, badges — earned only. Never ordinary chrome. |
+| **Parchment** | #F7F4EC | Ponder's writing surface. Warmth, not glare. |
+| **Dusk blue** | #8FA6C9 | Secondary text, quiet-state UI. |
+| **Growth green** | #1E7D5C | Streaks and progress — distinct from reward gold. |
+
+## **16\.2\. Typography**
+
+Two families. **Fraunces** carries the brand voice: headlines, the Soldier's rank, celebration screens — never scripture text. **Inter** carries everything read for information: scripture, guiding questions, interface labels — plain and legible, never decorated.
+
+| Style | Size | Use |
+| :---- | :---- | :---- |
+| Display | 40 | Headlines, celebrations |
+| H1 | 28 | Screen titles |
+| H2 | 20 | Section headers |
+| Scripture | 17, 1.6 line height | Scripture text, never decorated |
+| Body | 15 | Questions, descriptions |
+| Label | 12 | Buttons, tags, captions |
+
+## **16\.3\. Adapting across ages 4–17**
+
+| Age group | Wording | Soldier |
+| :---- | :---- | :---- |
+| **4–7** | Very simple words, everything read aloud | Round, friendly, exaggerated |
+| **8–11** | Simple wording, reading and listening both offered | Proportioned, still warm |
+| **12–17** | Grown-up wording | Heroic, painterly, no cartoon feel |
+
+Layout, colour, and interaction never change by age.
+
+## **16\.4\. Flows**
+
+**Onboarding.** Choosing who you are doubles as sign-up: "I'm a parent" or "I'm meditating for myself." Parent sign-up uses Email + Password with minimal fields and no child data. A child is added with only a first name or nickname and an age group. The child then meets their Soldier at Recruit rank.
+
+**Home and the three steps.** Home shows three things only: Soldier, today's scripture, browse themes. The palette narrows as focus deepens: Home is navy and gold, Ponder strips to near-monochrome parchment stillness with no timer, Mutter holds a steady phrase-by-phrase rhythm with progress dots to 20 and soft sound, and Roar is the only screen allowed to go fully loud, with words lighting up and a Declare button. A rank-up celebration appears only on promotion; ordinary days close warmly.
+
+**My Journey.** One button off Home holds the treasure chest, streak, badges, and the jewel shop (uniform, banner, armor bought with earned jewels) — so Home stays uncluttered. *Full vision; shop, jewels, streaks, and badges wait for after Version 1 (see Section 4).*
+
+**Parent area.** PIN-locked so a child cannot wander in; calmer than the child's world. Shows each child's streak, scriptures with step reached, and time spent; a weekly focus theme picker; and the subscription. A child never sees a price. *Progress detail, focus picker, and subscription wait for after Version 1; Version 1 keeps setup confirmation, PIN, and deletion.*
+
+## **16\.5\. Components and principles**
+
+Buttons: Ember Amber for every primary action, Ghost for secondary. Mutter progress is a row of dots — filled dot per repetition, never a numeric-only counter. Rank badge and streak chip carry earned status. The focus warning reads "Your Soldier is waiting — come back in the next minute to keep your place."
+
+1. **Earned colour stays earned.** Gold appears only at real achievement, or the reward stops meaning anything.
+2. **The palette narrows as focus deepens.** Only Roar goes loud.
+3. **The Soldier is illustrated, not iconographic.** A character, not a logo; the age shift lives in his art while the UI stays age-agnostic.
+4. **Scripture text is never decorated.** The one visual constant a 5-year-old and a 17-year-old both read the same way.
