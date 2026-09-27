@@ -259,3 +259,18 @@ Version 1 includes one theme, Sound Mind, with 3 scriptures. Each scripture need
 6. Review what worked, then decide what to add from the full plan.
 
 *This document is a starting point. We will refine it together as we learn.*
+
+# **15\. Technical Stack and Why It Was Chosen**
+
+These choices serve the PRD's constraints: real-family testing on phones and tablets, children's safety first, minimal spend, and a V1 architecture that never needs a rewrite when the full plan arrives.
+
+| Choice | What it is | Why |
+| :---- | :---- | :---- |
+| **Framework: Expo React Native + TypeScript** | One codebase for iOS and Android, phones and tablets | Reaches every test family from a single build; offline and audio support for the three steps; store releases for testing |
+| **Database: Postgres on our own device (Docker)** | Full SQL database running locally, not in a cloud | Zero hosting cost; holds the entire schema (V1 plus jewels, streaks, entitlements) from day one; children's data stays on our machine, the strongest safety posture |
+| **Authentication: Better Auth (Email + Password)** | Self-hosted sign-in against our own database, parent accounts only | No auth vendor and no per-user fees; matches the onboarding design (Email + Password); children exist only as profiles under a parent, so a child can never hold credentials |
+| **File storage: Cloudflare R2** | The only cloud piece; holds audio, artwork, and Ponder uploads | Generous free tier with zero egress fees, which matters when Roar audio and message clips stream later; presigned URLs keep files private |
+| **Local hosting for now** | API and database run on our device; the phone connects over WiFi | Nothing to pay or configure in clouds during V1; same schema and storage move to hosted infrastructure later without app changes |
+| **No Supabase, no Vercel** | Deliberately excluded | Keeps the stack free, self-contained, and under our control while testing with families |
+
+Every other service follows the same free-first rule: our own analytics table instead of a vendor, free crash reporting, and store releases only — so Version 1 needs no paid service at all.
