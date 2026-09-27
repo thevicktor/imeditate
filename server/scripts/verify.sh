@@ -13,13 +13,14 @@ $PSQL -c "SELECT id, title, is_free FROM themes;"
 echo "== cascade test (rolled back) =="
 $PSQL <<'SQL'
 BEGIN;
-INSERT INTO parents (email, pin_hash) VALUES ('verify@test.local', 'x') RETURNING id;
+INSERT INTO parents (email, pin_hash) VALUES ('verify@test.local', 'x');
+INSERT INTO children (parent_id, nickname, age_group)
+  SELECT id, 'Verify', '8-11' FROM parents WHERE email='verify@test.local';
+DELETE FROM parents WHERE email='verify@test.local';
+SELECT count(*) AS orphan_children FROM children WHERE parent_id NOT IN (SELECT id FROM parents);
+ROLLBACK;
+SELECT count(*) AS test_rows_left FROM parents WHERE email='verify@test.local';
 SQL
-PID=$($PSQL -t -c "SELECT id FROM parents WHERE email='verify@test.local';")
-echo "parent: $PID"
-$PSQL -c "INSERT INTO children (parent_id, nickname, age_group) VALUES ('$PID', 'Verify', '8-11');"
-$PSQL -c "DELETE FROM parents WHERE id='$PID';"
-$PSQL -c "SELECT count(*) AS orphan_children FROM children WHERE parent_id='$PID';"
 echo "== backup =="
 docker exec imeditate-postgres pg_dump -U imeditate imeditate > /tmp/imeditate_verify.sql
 echo "backup bytes: $(wc -c < /tmp/imeditate_verify.sql)"
