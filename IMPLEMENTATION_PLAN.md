@@ -3,7 +3,7 @@
 Source of truth: `iMeditate_PRD_A_Small_First_Version.md` + `README.md`.
 - V1 goal: a child completes Ponder → Mutter → Roar on a scripture, enjoys it, returns, and feels proud watching the Soldier grow.
 - Full vision (post-V1, from PRD §4 "Not included"): payments/subscriptions, jewel shop + jewels, streaks/badges/reminders, full parent progress view, Pastor Chris Oyakhilome messages, more themes, ranks beyond Captain (General → stars → cities/continents/regions), multiple children, parent personal plan.
-- This plan covers V1 slices PLUS every system those deferred items require (database, payments, economy, notifications, CMS, compliance, DevOps), so V1 architecture never needs a rewrite.
+- Hosting constraint: local device for now. No Supabase. No Vercel. Free alternatives throughout.
 
 ## Track 0 — Decisions that unblock everything
 
@@ -15,21 +15,24 @@ Source of truth: `iMeditate_PRD_A_Small_First_Version.md` + `README.md`.
 
 ### 0B. Technical decisions (locked in `docs/DECISIONS.md`)
 
-| Decision | Choice | Why |
+| Decision | Choice (free / local-first) | Why |
 |---|---|---|
-| App framework | Expo React Native + TypeScript, phones + tablets, iOS + Android | One codebase, EAS build/submit, OTA for content/copy fixes |
-| Backend | Supabase (Postgres + Auth + Storage + Edge Functions) | RLS parent-owned data, easy deletes, webhooks for payments/push |
-| Local state | Zustand + MMKV persisted, TanStack Query sync | Offline-first sessions; Ponder artifacts survive restarts |
-| Audio | expo-av, pre-bundled MP3s in V1; streaming/CDN later | Offline-safe for family testing; no mic permission ever |
-| Drawing | Skia/SVG canvas → PNG local + Storage upload | No kids-data third party |
-| Auth V1 | Email magic link, parent only; child = profile under parent | Smallest safe setup |
-| Auth full | + Apple/Google sign-in, parent PIN + optional biometrics for parent area | Store-compliant, kid-proof |
-| Payments | RevenueCat + StoreKit 2 / Play Billing; server webhook → entitlements | No custom receipt crypto; kids never see prices (parent-area only, PIN-gated) |
-| Push | Expo Push → FCM/APNs; all reminders parent-controlled, child gets none directly | Streak/reminder features without spamming kids |
-| Analytics | Privacy-safe aggregated events (step start/finish, D2/D3 return, rank-ups). No child PII, no audio recording | PRD §2 metrics; COPPA/GDPR-K friendly |
-| Crash/logs | Sentry (no PII), EAS Update channels (dev/internal/prod) | Safe OTA for JS/content only |
+| App framework | Expo React Native + TypeScript, phones + tablets, iOS + Android | One codebase, EAS dev builds, store releases |
+| Backend API | Node (Hono or Fastify) + Drizzle ORM, runs on local device via Docker Compose | No Supabase, no Vercel; phone hits `http://<mac-lan-ip>:3000` on same WiFi |
+| Database | Local Postgres (Docker Compose on this Mac) | Full SQL schema below; zero hosting cost; LAN-reachable for device testing |
+| Auth | Better Auth (email magic link, parent-only sessions, session rows in local Postgres) | No Supabase Auth; parent PIN + optional biometrics for parent area |
+| Storage | Cloudflare R2 (S3-compatible; free tier 10 GB + zero egress) | Ponder PNGs, audio bundles, message clips via presigned PUT/GET URLs |
+| Local state | Zustand + MMKV persisted, TanStack Query sync to local API | Offline-first sessions; Ponder artifacts survive restarts |
+| Audio | expo-av, pre-bundled MP3s in V1; R2-hosted streaming with cache later | Offline-safe for family testing; no mic permission ever |
+| Drawing | Skia/SVG canvas → PNG local + R2 upload | No kids-data third party |
+| Payments (post-V1) | RevenueCat free tier + StoreKit 2 / Play Billing; webhook lands on local API (via Cloudflare Tunnel during sandbox tests) | No custom receipt crypto; kids never see prices (parent-area only, PIN-gated) |
+| Push (post-V1) | Expo Push (free) → FCM/APNs; parent-controlled reminders only | No direct child targeting |
+| Analytics | Own `events` table in local Postgres (aggregated, no PII) | Zero vendor, matches no-PII rule; PRD §2 metrics |
+| Crash/logs | Firebase Crashlytics (free, no PII) | Sentry free tier also fine; Crashlytics simplest free crash-only option |
+| Releases V1 | Store releases only (TestFlight internal + Play internal); no OTA service | Free; EAS Update self-hosted server deferred to post-V1 if OTA ever needed |
+| Hosting | Local device for now (Mac = API + Postgres; R2 = only cloud piece) | No Supabase, no Vercel, minimal spend |
 
-**Acceptance:** translation license filed; DECISIONS.md merged; Supabase project, RevenueCat project, EAS channels, TestFlight internal group exist.
+**Acceptance:** translation license filed; DECISIONS.md merged; `docker compose up` gives API + Postgres; R2 bucket + presigned upload verified end-to-end; RevenueCat project exists (post-V1 use); TestFlight internal group exists.
 
 ## Phase 1 — Design system (V1 + reserved for full)
 
@@ -41,7 +44,15 @@ Source of truth: `iMeditate_PRD_A_Small_First_Version.md` + `README.md`.
 
 ## Phase 2 — Architecture
 
-### 2.1 Database (Supabase Postgres — build full schema in V1, enforce V1 subset in app)
+### 2.0 Local backend service (new — replaces BaaS)
+
+- `server/` (Node + Hono/Fastify + Drizzle + Better Auth + R2 SDK) running on this Mac via Docker Compose (`postgres`, `api`). Phone on same WiFi calls `http://<mac-lan-ip>:3000`.
+- Better Auth: email magic-link (parent only, SMTP via free tier e.g. Resend free / Gmail app password for dev), sessions stored in local Postgres, PIN hash checked at parent-area gate. Children never authenticate — all child writes go through parent session + `parent_id` ownership check in API middleware.
+- R2: private bucket; API mints presigned PUT (Ponder PNG upload) and presigned GET (audio/message streaming); keys `/{parentId}/{childId}/...`. Bundled V1 audio ships in-app; R2 path exercised by artifact uploads from day one.
+- Public-URL note: store/payment webhooks (post-V1 sandbox tests) need a public endpoint → use Cloudflare Tunnel (`cloudflared`) pointed at local API only during webhook testing. No permanent hosting.
+- Acceptance: cold start = `docker compose up`; magic-link login works from physical device over LAN; presigned R2 round-trip verified.
+
+### 2.1 Database (local Postgres — build full schema in V1, enforce V1 subset in app)
 
 ```sql
 -- identity (V1)
@@ -81,9 +92,10 @@ adult_progress(parent_id fk, scripture_id fk, stage text, updated_at timestamptz
 events(id uuid pk, parent_id fk null, event text, props jsonb, created_at timestamptz);
 ```
 
-- RLS: every row readable/writable only by its owning `parent_id` (via `auth.uid()`); children never authenticate. Service-role only for webhooks/ledger inserts (ledger append-only; balance = sum, never direct update).
+- Ownership (no RLS — enforced in API): middleware resolves parent from Better Auth session; every child/data query scoped to `parent_id`; cross-parent access tests deny. Ledger append-only (balance = sum, never direct update). Delete-child cascades rows + R2 objects (verified by re-fetch + HEAD on old URLs = gone).
 - XP/pacing: V1 thresholds as above; post-Captain curve flattens (e.g., General 8, stars 15/25/40, cities… defined in `ranks` so pacing tunes without code).
-- Acceptance: migration applies clean; RLS tests prove cross-parent access denied; delete-child cascades all rows + Storage files (verified by re-fetch).
+- Migrations: Drizzle forward-only migrations in repo, applied to local Postgres on `compose up`. Nightly `pg_dump` to Mac disk (documented restore command).
+- Acceptance: migration applies clean on fresh volume; ownership tests deny cross-parent reads/writes; delete wipes rows + R2 files.
 
 ### 2.2 Rules engines (unit-tested, content-driven)
 
@@ -92,27 +104,27 @@ events(id uuid pk, parent_id fk null, event text, props jsonb, created_at timest
 - Mutter pacing: phrase delay + rep target (20) in content config so 20-rep fatigue tunes without code (PRD risk).
 - Acceptance: tests for transitions, rank/streak/badge/ledger math, focus reset + artifact retention.
 
-### 2.3 Offline + sync + Storage
+### 2.3 Offline + sync + Storage (R2)
 
-- Local-first MMKV/filesystem; sync on reconnect; Storage paths `/{parentId}/{childId}/...`. Ponder PNGs queued uploads. Acceptance: full session in airplane mode; delete wipes local + server.
+- Local-first MMKV/filesystem; sync to local API on reconnect; R2 keys `/{parentId}/{childId}/...` via presigned URLs. Ponder PNGs queued uploads. Acceptance: full session in airplane mode; delete wipes local + Postgres + R2.
 
 ### 2.4 Audio + AppState
 
-- Preloaded expo-av players; call duck/pause; assert no mic permission in manifests. Post-V1: streaming with cache for extended library + Pastor Chris clips. Acceptance: call simulation pauses clock + audio.
+- Preloaded expo-av players; call duck/pause; assert no mic permission in manifests. Post-V1: R2 streaming with cache for extended library + Pastor Chris clips. Acceptance: call simulation pauses clock + audio.
 
 ### 2.5 Payments architecture (built post-V1, designed now)
 
-- Catalog in `products`; paywall only inside PIN-gated parent area; child navigation can never route to it (guard test). Flow: parent buys via StoreKit/Play → RevenueCat webhook → Edge Function verifies → upserts `entitlements` + `purchase_events` → app unlocks themes/ranks. Restore-purchases on reinstall. Receipts server-side only. Children never see prices/buy buttons (PRD §11). Acceptance: sandbox purchase → entitlement → unlock; refund/revoke → entitlement expires; restore works.
+- Catalog in `products`; paywall only inside PIN-gated parent area; child navigation can never route to it (guard test). Flow: parent buys via StoreKit/Play → RevenueCat webhook → local API route verifies (via Cloudflare Tunnel in sandbox) → upserts `entitlements` + `purchase_events` → app unlocks themes/ranks. Restore-purchases on reinstall. Receipts server-side only. Children never see prices/buy buttons (PRD §11). Acceptance: sandbox purchase → entitlement → unlock; refund/revoke → entitlement expires; restore works.
 
 ### 2.6 Notifications architecture (post-V1)
 
-- `devices` + `reminder_settings` (parent-owned); Edge Function cron sends gentle reminders (streak nudge, new theme) to parent device only; no direct child targeting; quiet hours; one-tap disable. Acceptance: opt-in → scheduled → disable stops all.
+- `devices` + `reminder_settings` (parent-owned); local scheduler (node-cron in API, or device cron hitting API) sends gentle reminders via Expo Push to parent device only; no direct child targeting; quiet hours; one-tap disable. Acceptance: opt-in → scheduled → disable stops all.
 
 ## Phase 3 — V1 build slices (in order, each demoable)
 
-3.1 Parent onboarding: "I'm a parent" → magic link → add ONE child (nickname + age group) → confirmation + PIN. No photo/location/school fields exist. Acceptance: unaided setup.
+3.1 Parent onboarding: "I'm a parent" → Better Auth magic link → add ONE child (nickname + age group) → confirmation + PIN. No photo/location/school fields exist. Acceptance: unaided setup against local API over LAN.
 3.2 Meet Soldier + Home: intro to 3 steps; Home = Soldier/rank, today's scripture + big Start, theme browser (3 items). Acceptance: child reaches Start unaided per age band.
-3.3 Ponder: read-aloud, sequential questions, write/draw save, "I'm done", no timer. Acceptance: artifact survives restart.
+3.3 Ponder: read-aloud, sequential questions, write/draw save, "I'm done", no timer. Acceptance: artifact survives restart (local + R2 URL in `artifacts`).
 3.4 Mutter: phrase-by-phrase, 20-rep counter, bed loop, no mic. Acceptance: pacing tunable via content.
 3.5 Roar: word-lighting + music, boldest UI; completion marks scripture done.
 3.6 Celebrate + growth: rank-up celebration vs. warm message; armies visual grows. Acceptance: first completion always promotes.
@@ -126,23 +138,23 @@ events(id uuid pk, parent_id fk null, event text, props jsonb, created_at timest
 4.3 Jewel economy + shop: earn jewels on completion/streak/badge (ledger reasons), spend on `shop_items` (rank-gated, equip/own), balance = ledger sum. Acceptance: double-spend impossible; history auditable.
 4.4 Streaks + badges + reminders: streak calc (timezone-safe, parent-local), badge rules engine, reminder opt-in + scheduling + disable. Acceptance: streak survives offline; badge awarded once; reminders stop on disable.
 4.5 Content expansion: new themes (content PRs only), full rank ladder art/story (General → stars → cities/continents/regions) with gentle pacing from `ranks` table. Acceptance: finishing all V1 content no longer caps progression visually.
-4.6 Pastor Chris messages: licensed clips + transcripts in `pastor_messages`, dedicated player (parent area + age-appropriate surfacing TBD), license_ref displayed in-app. Acceptance: unlicensed item can't ship (CI license check).
+4.6 Pastor Chris messages: licensed clips + transcripts in `pastor_messages` (R2-hosted), dedicated player (parent area + age-appropriate surfacing TBD), license_ref displayed in-app. Acceptance: unlicensed item can't ship (CI license check).
 4.7 Full parent dashboard: per-child streaks, time spent, stage reached per scripture; export/delete; weekly summary. Acceptance: answers PRD full-plan progress questions without exposing child PII anywhere new.
 
 ## Phase 5 — Safety, compliance, store readiness
 
-- Kids safety: no ads SDKs, no chat, no mic, no prices in child flows, minimal data (nickname + age group), private storage, parent delete anytime (PRD §11). Age-rating questionnaires (Apple Kids category, Google Designed for Families if pursued) answered from this doc.
-- Privacy law: COPPA/GDPR-K posture — parental consent at signup, data-minimization review, retention/deletion policy, DPA with Supabase/RevenueCat/Sentry; analytics contains no child PII.
+- Kids safety: no ads SDKs, no chat, no mic, no prices in child flows, minimal data (nickname + age group), private R2 storage, parent delete anytime (PRD §11). Age-rating questionnaires answered from this doc.
+- Privacy law: COPPA/GDPR-K posture — parental consent at signup, data-minimization review, retention/deletion policy, DPAs with Cloudflare/RevenueCat; analytics contains no child PII. Note: local Postgres = you are the data custodian — encrypt disk (FileVault), document backup encryption.
 - Store assets: name "iMeditate", Soldier icon, screenshots per age band, privacy policy + terms + support URL, permission justifications (notifications only, parent-initiated).
-- Acceptance: pre-submission checklist signed; mic/ads SDK scan clean; deletion end-to-end verified.
+- Acceptance: pre-submission checklist signed; mic/ads SDK scan clean; deletion end-to-end verified (rows + R2).
 
-## Phase 6 — DevOps, QA, family testing, launch
+## Phase 6 — DevOps, QA, family testing, launch (local-first)
 
-- Env: `dev/internal/prod` (EAS channels + Supabase projects); migrations forward-only; content PRs validated by CI; EAS Build + Submit; Sentry releases tied to build numbers.
-- QA matrix: small phone + tablet × iOS/Android; offline; call interruption; 5-min warning timing; PIN brute-force lockout; purchase sandbox + restore + refund; reminder on/off.
+- Env: this Mac is dev+test (`docker compose up`: postgres + api; nightly `pg_dump`). No Vercel, no Supabase projects. Content PRs validated by CI (GitHub Actions free minutes). EAS dev/internal builds pointed at LAN URL; prod builds pointed at future cloud API (migration path: same Drizzle migrations + R2 bucket reused).
+- QA matrix: small phone + tablet × iOS/Android; offline; call interruption; 5-min warning timing; PIN brute-force lockout; purchase sandbox + restore + refund (via tunnel); reminder on/off.
 - Family testing (PRD §2/§14): ≥1 family per age band, in person where possible. Metrics: % start→Roar, D2/D3 return, Soldier excitement, unaided setup, comprehension without adult help. Tuning levers without redesign: Mutter pacing, warning copy/timing, question wording, rank/XP curve, reminder timing.
-- Launch readiness: translation license filed, Soldier/ranks/icon final, support inbox, rollback plan (EAS channel rollback + migration compatibility).
+- Launch readiness: translation license filed, Soldier/ranks/icon final, support inbox, rollback plan (store build rollback + migration compatibility).
 
 ## Build order summary
 
-0B decisions → DB migration (full schema) → 1.1 tokens → 2.1 rules engines → 1.2 components → 3.1–3.8 V1 → 4.1 multi-child/adult → 4.2 payments → 4.3–4.4 economy/engagement → 4.5–4.7 content/messages/dashboard → Phase 5–6 hardening/launch. Content/legal track (0A) runs parallel from day one.
+0B decisions → `server/` + compose (Postgres + API + Better Auth + R2 wiring) → full-schema migration → 1.1 tokens → 2.2 rules engines → 1.2 components → 3.1–3.8 V1 → 4.1 multi-child/adult → 4.2 payments → 4.3–4.4 economy/engagement → 4.5–4.7 content/messages/dashboard → Phase 5–6 hardening/launch. Content/legal track (0A) runs parallel from day one. Cloud migration later = lift same Postgres schema + API + R2 bucket to hosted infra; app already talks HTTP to API, so only base-URL + auth-secret rotation changes.
