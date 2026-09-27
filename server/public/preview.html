@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iMeditate — API Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,900&family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0F1E3D;--navy2:#16294f;--red:#B3202A;--red-d:#7E161D;--gold:#F4B942;--amber:#D9772E;--parchment:#F7F4EC;--dusk:#8FA6C9;--green:#1E7D5C;--ink:#101828}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,system-ui,sans-serif;background:var(--navy);color:var(--parchment);font-size:15px;line-height:1.55}
+.wrap{max-width:720px;margin:0 auto;padding:32px 20px 80px}
+h1{font-family:Fraunces,serif;font-weight:900;font-size:32px}
+.sub{color:var(--dusk);font-size:13px;margin-bottom:20px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#555;margin-right:6px}
+.dot.ok{background:var(--green)}.dot.bad{background:var(--red)}
+.card{background:var(--navy2);border:1px solid #263c6b;border-radius:20px;padding:20px;margin-bottom:14px}
+.card h2{font-size:17px;margin-bottom:4px}
+.card p.hint{color:var(--dusk);font-size:13px;margin-bottom:12px}
+input,select{background:#0b1730;border:1px solid #2c4478;color:var(--parchment);border-radius:12px;padding:11px 12px;width:100%;margin:5px 0;font-size:14px;font-family:inherit}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.btn{display:block;text-align:center;border:none;cursor:pointer;font-weight:800;border-radius:999px;padding:13px;font-size:15px;font-family:inherit;margin-top:8px;width:100%}
+.btn-amber{background:var(--amber);color:#fff}.btn-ghost{background:transparent;color:var(--dusk);border:1.5px solid #2c4478}
+.btn:disabled{opacity:.4;cursor:default}
+.seg{display:flex;gap:6px;margin:6px 0}.seg button{flex:1;padding:9px 0;border-radius:10px;background:#0b1730;color:var(--dusk);border:1px solid #2c4478;font-weight:700;font-size:13px;cursor:pointer}
+.seg button.on{background:var(--amber);color:#fff;border-color:var(--amber)}
+.kid{display:flex;align-items:center;gap:10px;background:#0b1730;border:1px solid #2c4478;border-radius:14px;padding:10px 14px;margin:6px 0;cursor:pointer}
+.kid.sel{border-color:var(--gold)}
+.kid .r{margin-left:auto;color:var(--gold);font-weight:800;font-size:12px}
+.scripture{font-size:17px;line-height:1.6;margin:10px 0}
+.dots{display:flex;flex-wrap:wrap;gap:5px;margin:10px 0}.dots i{width:13px;height:13px;border-radius:50%;background:#22345f;border:1px solid #2c4478}.dots i.f{background:var(--amber);border-color:var(--amber)}
+.steps{display:flex;gap:6px;margin:10px 0}.steps div{flex:1;text-align:center;font-size:12px;font-weight:800;padding:8px 0;border-radius:10px;background:#0b1730;color:var(--dusk);border:1px solid #2c4478}.steps div.done{background:var(--green);color:#fff;border-color:var(--green)}.steps div.now{background:var(--amber);color:#fff;border-color:var(--amber)}
+.banner{border-radius:16px;padding:18px;text-align:center;margin-top:10px}
+.banner.promo{background:linear-gradient(165deg,var(--red),var(--red-d));border:2px solid var(--gold)}
+.banner.calm{background:#0b1730;border:1px solid #2c4478}
+.banner .big{font-family:Fraunces,serif;font-size:26px;font-weight:900}
+canvas#pad{width:100%;height:160px;background:var(--parchment);border-radius:14px;touch-action:none;cursor:crosshair}
+#log{background:#0b1730;border:1px solid #2c4478;border-radius:12px;padding:10px 12px;font-size:12px;color:var(--dusk);max-height:130px;overflow:auto;margin-top:14px;white-space:pre-wrap}
+.demo-tag{font-size:11px;font-weight:800;color:var(--ink);background:var(--gold);border-radius:6px;padding:2px 8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>iMeditate <span style="font-size:14px;color:var(--dusk)">API preview</span></h1>
+<p class="sub"><span id="health" class="dot"></span><span id="health-t">checking api…</span> · local stack · same page drives signup → Roar</p>
+
+<div class="card"><h2>1 · Parent account</h2><p class="hint">Email + Password. Minimal data — no child info here.</p>
+<input id="email" placeholder="Email" value="parent@test.local"><input id="pw" type="password" placeholder="Password (8+)" value="testpass123">
+<div class="row"><button class="btn btn-amber" onclick="signup()">Sign up</button><button class="btn btn-ghost" onclick="signin()">Sign in</button></div>
+<p class="hint" id="me" style="margin:8px 0 0"></p></div>
+
+<div class="card"><h2>2 · Parent PIN</h2><p class="hint">Set once, then unlock. 4–6 digits.</p>
+<div class="row"><input id="pin" placeholder="1234" maxlength="6"><button class="btn btn-amber" onclick="setPin()">Set PIN</button><button class="btn btn-ghost" onclick="unlock()">Unlock</button></div></div>
+
+<div class="card"><h2>3 · Child</h2><p class="hint">Nickname + age group only.</p>
+<input id="nick" placeholder="First name or nickname"><div class="seg" id="ageseg">
+<button data-a="4-7">4–7</button><button data-a="8–11" class="on">8–11</button><button data-a="12–17">12–17</button></div>
+<button class="btn btn-amber" onclick="addChild()">Add child</button><div id="kids"></div></div>
+
+<div class="card"><h2>4 · Meditate</h2><p class="hint" id="sess-hint">Pick a child above first.</p>
+<div id="sess" style="display:none">
+<div class="steps" id="stepbar"><div data-s="ponder">Ponder</div><div data-s="mutter">Mutter</div><div data-s="roar">Roar</div><div data-s="done">Done</div></div>
+<div class="scripture" id="verse"></div><span class="demo-tag">DEMO VERSE — replaced by real content later</span>
+<div id="ponder-box"><p class="hint">Ponder: picture yourself in it. Draw below, then “I’m done”. No timer.</p>
+<canvas id="pad" width="640" height="160"></canvas>
+<div class="row"><button class="btn btn-ghost" onclick="clearPad()">Clear</button><button class="btn btn-amber" onclick="savePad()">Save drawing + I’m done</button></div></div>
+<div id="mutter-box" style="display:none"><p class="hint">Mutter: say it softly, 20 times.</p><div class="dots" id="dots"></div>
+<div class="row"><button class="btn btn-amber" onclick="rep()">Said it (+1)</button><button class="btn btn-ghost" id="toroar" onclick="goRoar()" disabled>Go to Roar</button></div></div>
+<div id="roar-box" style="display:none"><p class="hint">Roar: declare it LOUD!</p><button class="btn btn-amber" onclick="declareIt()">Declare it!</button></div>
+<div id="result"></div></div></div>
+<div id="log"></div>
+</div>
+<script>
+const log=(m)=>{document.getElementById('log').textContent+=m+"\n"};
+const api=async(method,path,body)=>{const r=await fetch(path,{method,headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});const t=await r.text();let j;try{j=JSON.parse(t)}catch{j={raw:t}};log(`${method} ${path} → ${r.status}`);if(!r.ok)throw new Error(JSON.stringify(j));return j};
+let age='8-11',kid=null,stage='ponder',count=0,rep=0,SCRIP='demo-courage';
+document.querySelectorAll('#ageseg button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#ageseg button').forEach(x=>x.classList.remove('on'));b.classList.add('on');age=b.dataset.a});
+fetch('/health').then(r=>r.json()).then(()=>{document.getElementById('health').className='dot ok';document.getElementById('health-t').textContent='api healthy'}).catch(()=>{document.getElementById('health').className='dot bad';document.getElementById('health-t').textContent='api down — is docker compose up?'});
+async function signup(){try{const u=await api('POST','/api/auth/sign-up/email',{name:'Parent',email:email.value,password:pw.value});document.getElementById('me').textContent='Signed up: '+u.user.email;refreshKids()}catch(e){log('ERR '+e.message)}}
+async function signin(){try{await api('POST','/api/auth/sign-in/email',{email:email.value,password:pw.value});const m=await api('GET','/api/me');document.getElementById('me').textContent='Signed in: '+m.email;refreshKids()}catch(e){log('ERR '+e.message)}}
+async function setPin(){try{await api('POST','/api/parent/pin',{pin:pin.value});log('PIN set')}catch(e){log('ERR '+e.message)}}
+async function unlock(){try{await api('POST','/api/parent/unlock',{pin:pin.value});log('Unlocked — welcome to parent area')}catch(e){log('ERR '+e.message)}}
+async function addChild(){try{await api('POST','/api/children',{nickname:nick.value,age_group:age});refreshKids()}catch(e){log('ERR '+e.message)}}
+async function refreshKids(){try{const k=await api('GET','/api/children');const d=document.getElementById('kids');d.innerHTML='';k.forEach(c=>{const el=document.createElement('div');el.className='kid'+(kid&&kid.id===c.id?' sel':'');el.innerHTML=`<b>${c.nickname}</b> ${c.age_group}<span class="r">${c.soldier_rank}</span>`;el.onclick=()=>{kid=c;refreshKids();startSession()};d.appendChild(el)})}catch(e){}}
+async function startSession(){document.getElementById('sess').style.display='block';document.getElementById('sess-hint').textContent=`${kid.nickname} · ${kid.age_group} · ${kid.soldier_rank}`;try{const s=await api('GET','/api/themes/sound-mind/scriptures');const v=s.find(x=>x.id===SCRIP)||s[0];if(v){SCRIP=v.id;document.getElementById('verse').textContent=`"${v.text}" — ${v.ref}`}}catch(e){log('ERR '+e.message)};await syncProgress()}
+async function syncProgress(){try{const p=await api('GET',`/api/progress/${kid.id}`);const cur=p.find(x=>x.scripture_id===SCRIP);stage=cur?cur.stage:'ponder';count=cur?cur.mutter_count:0;rep=count;paint()}catch(e){log('ERR '+e.message)}}
+function paint(){document.querySelectorAll('#stepbar div').forEach(d=>{const s=d.dataset.s;const order=['ponder','mutter','roar','done'];d.className=order.indexOf(s)<order.indexOf(stage)?'done':(s===stage?'now':'')});document.getElementById('ponder-box').style.display=stage==='ponder'?'block':'none';document.getElementById('mutter-box').style.display=stage==='mutter'?'block':'none';document.getElementById('roar-box').style.display=stage==='roar'?'block':'none';const dots=document.getElementById('dots');dots.innerHTML='';for(let i=0;i<20;i++){const el=document.createElement('i');if(i<rep)el.className='f';dots.appendChild(el)}document.getElementById('toroar').disabled=rep<20}
+async function put(stage,count){return api('PUT',`/api/progress/${kid.id}/${SCRIP}`,{stage,mutter_count:count})}
+async function rep(){if(rep>=20)return;rep++;try{await put('mutter',rep);paint()}catch(e){log('ERR '+e.message)}}
+async function goRoar(){try{await put('roar',20);await syncProgress()}catch(e){log('ERR '+e.message)}}
+async function declareIt(){try{const r=await put('done',20);const w=await api('GET',`/api/wallet/${kid.id}`);document.getElementById('result').innerHTML=r.promoted?`<div class="banner promo"><div class="big">PROMOTED<br>${r.rank}!</div><p>${w.balance} jewels · armies grow</p></div>`:`<div class="banner calm"><div class="big">Well done today</div><p>${w.balance} jewels · Soldier is proud</p></div>`;refreshKids();await syncProgress()}catch(e){log('ERR '+e.message)}}
+// drawing pad
+const pad=document.getElementById('pad'),ctx=pad.getContext('2d');ctx.lineWidth=4;ctx.strokeStyle='#0F1E3D';let drawing=false;
+const pos=e=>{const r=pad.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return[(t.clientX-r.left)*pad.width/r.width,(t.clientY-r.top)*pad.height/r.height]};
+pad.onmousedown=pad.ontouchstart=e=>{drawing=true;const[x,y]=pos(e);ctx.beginPath();ctx.moveTo(x,y);e.preventDefault()};
+pad.onmousemove=pad.ontouchmove=e=>{if(!drawing)return;const[x,y]=pos(e);ctx.lineTo(x,y);ctx.stroke();e.preventDefault()};
+addEventListener('mouseup',()=>drawing=false);pad.ontouchend=()=>drawing=false;
+function clearPad(){ctx.clearRect(0,0,pad.width,pad.height)}
+async function savePad(){try{const png=pad.toDataURL('image/png').split(',')[1];await api('POST','/api/artifacts',{child_id:kid.id,scripture_id:SCRIP,png_base64:png});await put('mutter',0);await syncProgress();log('drawing saved → Mutter')}catch(e){log('ERR '+e.message)}}
+</script>
+</body>
+</html>
