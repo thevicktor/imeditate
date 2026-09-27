@@ -1,0 +1,5 @@
+# local secrets + generated stuff — never commit
+server/.env
+server/media/
+server/node_modules/
+*.log
