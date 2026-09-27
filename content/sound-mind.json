@@ -1,0 +1,18 @@
+{
+  "theme": { "id": "sound-mind", "title": "Sound Mind", "is_free": true },
+  "scriptures": [
+    {
+      "id": "demo-courage",
+      "ref": "Joshua 1:9 (DEMO — replaced by licensed text)",
+      "text": "Be strong and courageous. Do not be afraid.",
+      "phrases": ["Be strong and courageous.", "Do not be afraid."],
+      "questions": {
+        "4-7": ["Where are you in this story?", "Who is with you?"],
+        "8-11": ["What do you see, hear, and feel in this verse?", "When do you feel afraid?"],
+        "12-17": ["How does this truth reframe what you are facing today?"]
+      },
+      "audio_url": null,
+      "sort": 1
+    }
+  ]
+}
