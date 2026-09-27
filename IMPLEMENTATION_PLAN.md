@@ -1,108 +1,148 @@
-# iMeditate V1 — Implementation Plan
+# iMeditate — Full Implementation Plan (V1 + everything after)
 
 Source of truth: `iMeditate_PRD_A_Small_First_Version.md` + `README.md`.
-Goal of V1: a child completes Ponder → Mutter → Roar on a scripture, enjoys it, returns, and feels proud watching the Soldier grow.
+- V1 goal: a child completes Ponder → Mutter → Roar on a scripture, enjoys it, returns, and feels proud watching the Soldier grow.
+- Full vision (post-V1, from PRD §4 "Not included"): payments/subscriptions, jewel shop + jewels, streaks/badges/reminders, full parent progress view, Pastor Chris Oyakhilome messages, more themes, ranks beyond Captain (General → stars → cities/continents/regions), multiple children, parent personal plan.
+- This plan covers V1 slices PLUS every system those deferred items require (database, payments, economy, notifications, CMS, compliance, DevOps), so V1 architecture never needs a rewrite.
 
-## Track 0 — Decisions that unblock everything (do first)
+## Track 0 — Decisions that unblock everything
 
-### 0A. Content/legal (parallel to engineering)
+### 0A. Content/legal (parallel to engineering, starts day one)
 
-- Choose Bible translation + confirm app-use license in writing. Blocks all audio/scripture work.
-- Finalize 3 Sound Mind scriptures + phrase breaks for Mutter.
-- Write guiding questions × 3 age groups (4–7, 8–11, 12–17).
-- Commission/produce: 3 Ponder readings (audio), 1 Mutter bed loop, 1 Roar track.
-- Define rank thresholds. Proposal: Recruit (0 completions) → Private (1) → Sergeant (2) → Captain (3). Guarantees a promotion on the first finish, Captain on finishing all 3. Armies visual count = rank index.
+- V1: choose Bible translation + confirm app-use license in writing (blocks ALL scripture/audio work). Finalize 3 Sound Mind scriptures + Mutter phrase breaks. Guiding questions × 3 age groups (4–7, 8–11, 12–17). Produce: 3 Ponder readings, 1 Mutter bed loop, 1 Roar track.
+- Full: translation license must cover downloadable/streamed audio + additional themes (negotiate now, not per-theme). Pastor Chris permission request starts in V1 (needed only post-V1): scope = which messages, clip vs. full, transcription rights, territory, expiry. Rank-ladder story bible: General → stars → ruling cities/continents/regions with gentle pacing (XP curve defined in §2.1, content-gated so V1 ships thresholds for Captain only).
+- Rank thresholds V1 proposal: Recruit (0) → Private (1) → Sergeant (2) → Captain (3). First finish always promotes.
 
-### 0B. Technical decisions (recommendation)
+### 0B. Technical decisions (locked in `docs/DECISIONS.md`)
 
-| Decision | Recommendation | Why |
+| Decision | Choice | Why |
 |---|---|---|
-| App framework | Expo React Native + TypeScript (phones + tablets, iOS + Android) | One codebase, fast iteration, good audio/offline libs, easy TestFlight/Play internal testing |
-| Backend | Supabase (Auth + Postgres + Storage) | Minimal user data model, row-level security, parent-owned deletes, no custom server for V1 |
-| Local state | Zustand + MMKV (persisted) + TanStack Query for server sync | Survives restarts (Ponder work kept), works offline |
-| Audio | expo-av, pre-bundled MP3s (no TTS, no streaming in V1) | PRD requires prepared readings; offline-safe for families |
-| Drawing | Skia or SVG canvas → PNG saved locally + uploaded | Simple, no third-party kids-data risk |
-| Auth | Email + magic link (parent only), no child login | Smallest safe setup; child profile is local-to-parent-account |
-| Analytics (privacy-safe) | Aggregated events only: started/finished step, returns D2/D3, rank-ups. No child PII, no recordings | Maps directly to PRD §2 success questions |
+| App framework | Expo React Native + TypeScript, phones + tablets, iOS + Android | One codebase, EAS build/submit, OTA for content/copy fixes |
+| Backend | Supabase (Postgres + Auth + Storage + Edge Functions) | RLS parent-owned data, easy deletes, webhooks for payments/push |
+| Local state | Zustand + MMKV persisted, TanStack Query sync | Offline-first sessions; Ponder artifacts survive restarts |
+| Audio | expo-av, pre-bundled MP3s in V1; streaming/CDN later | Offline-safe for family testing; no mic permission ever |
+| Drawing | Skia/SVG canvas → PNG local + Storage upload | No kids-data third party |
+| Auth V1 | Email magic link, parent only; child = profile under parent | Smallest safe setup |
+| Auth full | + Apple/Google sign-in, parent PIN + optional biometrics for parent area | Store-compliant, kid-proof |
+| Payments | RevenueCat + StoreKit 2 / Play Billing; server webhook → entitlements | No custom receipt crypto; kids never see prices (parent-area only, PIN-gated) |
+| Push | Expo Push → FCM/APNs; all reminders parent-controlled, child gets none directly | Streak/reminder features without spamming kids |
+| Analytics | Privacy-safe aggregated events (step start/finish, D2/D3 return, rank-ups). No child PII, no audio recording | PRD §2 metrics; COPPA/GDPR-K friendly |
+| Crash/logs | Sentry (no PII), EAS Update channels (dev/internal/prod) | Safe OTA for JS/content only |
 
-**Acceptance:** translation chosen in writing; repo has `docs/DECISIONS.md` locking the above; Supabase project + TestFlight internal group exist.
+**Acceptance:** translation license filed; DECISIONS.md merged; Supabase project, RevenueCat project, EAS channels, TestFlight internal group exist.
 
-## Phase 1 — Design system
+## Phase 1 — Design system (V1 + reserved for full)
 
-### Slice 1.1 Tokens + moods
+**1.1 Tokens + moods.** Deep blues/reds + neutrals; calm (Home/Ponder/Mutter) vs. bold (Roar/celebration) moods; type scale 4–7 (large, read-aloud-first) → 12–17; motion tokens gentle vs. celebratory; AA contrast. Deliverable: `design/tokens.json` + showcase screen.
 
-- Palette: deep blues/reds (+ neutrals), mood pairs: calm (Home/Ponder/Mutter) vs. bold (Roar/celebration). Type scale readable at 4–7 (large, read-aloud-first) through 12–17. Spacing/radius/motion (gentle vs. celebratory) tokens. Dark-calm backgrounds that keep scripture legible.
-- Deliverable: `design/tokens.json` + Storybook/showcase screen.
-- Acceptance: contrast AA, same screen renders in both moods.
+**1.2 Components (V1 + full placeholders).** V1: big Start button, cards, step progress, 20-rep counter, audio player, drawing canvas, celebration sheet, Soldier avatar frame. Full reserves same API for: shop cards, jewel balance pill, badge grid, streak flame, parent charts, paywall sheet, message player. Age-group switch via `useCopy(ageGroup)`; Soldier art playful → heroic. Acceptance: one demo screen × 3 age groups, zero hardcoded strings (all from content files).
 
-### Slice 1.2 Components + age-group variants
+**1.3 Step + shell templates.** Ponder (quiet), Mutter (steady), Roar (energetic word-lighting), plus reserved shells: Shop, Badges, Parent Dashboard, Paywall (never reachable by child in V1 — navigation guard tested).
 
-- Core: buttons (big Start), cards, step progress, counter, audio player, drawing canvas, celebration sheet, Soldier avatar frame.
-- Age-group switch: copy-tone hook (`useCopy(ageGroup)`), Soldier art variants (playful → heroic), read-aloud default ON for 4–7.
-- Acceptance: one demo screen × 3 age groups, all copy from content files (no hardcoded strings).
+## Phase 2 — Architecture
 
-### Slice 1.3 Step templates
+### 2.1 Database (Supabase Postgres — build full schema in V1, enforce V1 subset in app)
 
-- Layout shells for Ponder (quiet), Mutter (steady), Roar (energetic: lighting words, music). Defines where Soldier appears/reacts.
-- Acceptance: designer can approve mood shift without engineering changes.
-
-## Phase 2 — Architecture skeleton
-
-### Slice 2.1 Data model + rules engine
-
+```sql
+-- identity (V1)
+parents(id uuid pk, email citext unique, pin_hash text, created_at timestamptz);
+children(id uuid pk, parent_id uuid fk, nickname text, age_group text
+  check (age_group in ('4-7','8-11','12-17')), soldier_rank text default 'Recruit',
+  created_at timestamptz);
+-- content (V1 + full)
+themes(id text pk, title text, is_free bool, min_entitlement text);
+scriptures(id text pk, theme_id fk, ref text, text text, phrases jsonb,
+  audio_url text, questions jsonb /* per age group */, sort int);
+progress(child_id fk, scripture_id fk, stage text, ponder_artifact_url text,
+  mutter_count int default 0, updated_at timestamptz, pk(child_id, scripture_id));
+artifacts(id uuid pk, child_id fk, scripture_id fk, png_url text, created_at timestamptz);
+-- progression/economy (tables ship in V1 migration; features gated post-V1)
+ranks(name text pk, level int, xp_required int, story_beat text);
+jewel_wallets(child_id pk fk, balance int default 0);
+jewel_ledger(id uuid pk, child_id fk, delta int, reason text, created_at timestamptz);
+shop_items(sku text pk, title text, price_jewels int, art_url text, rank_required text);
+owned_items(child_id fk, sku fk, equipped bool, pk(child_id, sku));
+streaks(child_id pk fk, current int, longest int, last_done_date date);
+badges(code text pk, title text, art_url text, rule jsonb);
+earned_badges(child_id fk, code fk, earned_at timestamptz, pk(child_id, code));
+devices(parent_id fk, expo_push_token text pk, created_at timestamptz);
+reminder_settings(parent_id pk fk, enabled bool, hour int, days int[]);
+-- payments (post-V1, schema ready)
+products(sku text pk, platform text, type text /* sub|pack */, entitlement text);
+entitlements(parent_id fk, entitlement text, expires_at timestamptz, pk(parent_id, entitlement));
+purchase_events(id uuid pk, parent_id fk, platform text, product_sku text,
+  revenuecat_id text unique, status text, created_at timestamptz);
+-- messages + adult plan (post-V1)
+pastor_messages(id text pk, title text, audio_url text, transcript_url text,
+  license_ref text, sort int);
+adult_progress(parent_id fk, scripture_id fk, stage text, updated_at timestamptz,
+  pk(parent_id, scripture_id));
+-- analytics (aggregated, no PII)
+events(id uuid pk, parent_id fk null, event text, props jsonb, created_at timestamptz);
 ```
-parent(id, email) → child(id, nickname, ageGroup, soldierRank)
-scripture(id, theme, text, phrases[], audioUrl, questions{4-7,8-11,12-17})
-progress(childId, scriptureId, stage: ponder|mutter|roar|done, ponderArtifactUrl, mutterCount, updatedAt)
-```
 
-- Stage machine: stages unlock in order; completion of Roar = scripture done → rank recompute.
-- Focus rule: `lastActiveAt`; background >5 min (excluding phone-call pause via AppState/call detection) → reset stage to Ponder, keep artifact, show Soldier warning at 4:30.
-- Acceptance: unit tests for stage transitions, rank thresholds, focus reset/keep-artifact.
+- RLS: every row readable/writable only by its owning `parent_id` (via `auth.uid()`); children never authenticate. Service-role only for webhooks/ledger inserts (ledger append-only; balance = sum, never direct update).
+- XP/pacing: V1 thresholds as above; post-Captain curve flattens (e.g., General 8, stars 15/25/40, cities… defined in `ranks` so pacing tunes without code).
+- Acceptance: migration applies clean; RLS tests prove cross-parent access denied; delete-child cascades all rows + Storage files (verified by re-fetch).
 
-### Slice 2.2 Offline + sync + deletion
+### 2.2 Rules engines (unit-tested, content-driven)
 
-- Local-first: progress/artifacts in MMKV/filesystem, sync to Supabase when online; parent "Delete child" cascades locally + server (verified by re-fetch = gone).
-- Acceptance: airplane-mode full session works; delete wipes all rows/files.
+- Stage machine: ponder → mutter → roar → done, unlock in order; Roar completion = scripture done → recompute rank + streak + badges + jewels (V1 computes rank only; other engines run but rewards hidden until their UI ships — keeps ledger consistent from day one).
+- Focus rule: `lastActiveAt`; background >5 min (call interruptions pause via AppState/phone-state) → stage resets to Ponder, artifact kept, Soldier warning at 4:30.
+- Mutter pacing: phrase delay + rep target (20) in content config so 20-rep fatigue tunes without code (PRD risk).
+- Acceptance: tests for transitions, rank/streak/badge/ledger math, focus reset + artifact retention.
 
-### Slice 2.3 Audio + AppState foundation
+### 2.3 Offline + sync + Storage
 
-- Preloaded players (reading, Mutter bed, Roar track), ducking/pausing on calls, no mic permission ever requested (assert in build config).
-- Acceptance: call simulation pauses clock + audio; mic permission absent in manifest.
+- Local-first MMKV/filesystem; sync on reconnect; Storage paths `/{parentId}/{childId}/...`. Ponder PNGs queued uploads. Acceptance: full session in airplane mode; delete wipes local + server.
 
-## Phase 3 — Build slices (in order, each independently testable)
+### 2.4 Audio + AppState
 
-**3.1 Parent onboarding** — choose "I'm a parent" → magic-link signup → add child (nickname + age group only) → setup confirmation. PIN creation for parent area. *Accepts: setup completable unaided; no photo/location fields exist.*
+- Preloaded expo-av players; call duck/pause; assert no mic permission in manifests. Post-V1: streaming with cache for extended library + Pastor Chris clips. Acceptance: call simulation pauses clock + audio.
 
-**3.2 Meet the Soldier + Home** — intro to 3 steps, Home shows Soldier/rank, today's scripture + big Start, theme browser (3 items). *Accepts: child reaches Start without adult explanation (test per age group).*
+### 2.5 Payments architecture (built post-V1, designed now)
 
-**3.3 Ponder** — read-aloud playback, one-at-a-time questions, write/draw + save, "I'm done" (no timer). *Accepts: artifact persists across restart.*
+- Catalog in `products`; paywall only inside PIN-gated parent area; child navigation can never route to it (guard test). Flow: parent buys via StoreKit/Play → RevenueCat webhook → Edge Function verifies → upserts `entitlements` + `purchase_events` → app unlocks themes/ranks. Restore-purchases on reinstall. Receipts server-side only. Children never see prices/buy buttons (PRD §11). Acceptance: sandbox purchase → entitlement → unlock; refund/revoke → entitlement expires; restore works.
 
-**3.4 Mutter** — phrase-by-phrase (from content breaks), 20-rep counter, bed loop, no mic. *Accepts: counter pacing tunable via content config (phrase delay) without code change — mitigates PRD risk of 20 feeling long.*
+### 2.6 Notifications architecture (post-V1)
 
-**3.5 Roar** — word-lighting declaration + music, boldest UI. Completion → rank recompute. *Accepts: finishing Roar marks scripture done.*
+- `devices` + `reminder_settings` (parent-owned); Edge Function cron sends gentle reminders (streak nudge, new theme) to parent device only; no direct child targeting; quiet hours; one-tap disable. Acceptance: opt-in → scheduled → disable stops all.
 
-**3.6 Celebrate + Soldier growth** — rank-up celebration vs. warm message; armies visual grows with rank. *Accepts: first completion always triggers a promotion (per thresholds).*
+## Phase 3 — V1 build slices (in order, each demoable)
 
-**3.7 Parent area (V1-minimal)** — PIN gate, setup confirmation, delete-child. Adult simple meditation using same Sound Mind content (no personal plan UI). *Accepts: wrong-PIN blocks child; delete verified.*
+3.1 Parent onboarding: "I'm a parent" → magic link → add ONE child (nickname + age group) → confirmation + PIN. No photo/location/school fields exist. Acceptance: unaided setup.
+3.2 Meet Soldier + Home: intro to 3 steps; Home = Soldier/rank, today's scripture + big Start, theme browser (3 items). Acceptance: child reaches Start unaided per age band.
+3.3 Ponder: read-aloud, sequential questions, write/draw save, "I'm done", no timer. Acceptance: artifact survives restart.
+3.4 Mutter: phrase-by-phrase, 20-rep counter, bed loop, no mic. Acceptance: pacing tunable via content.
+3.5 Roar: word-lighting + music, boldest UI; completion marks scripture done.
+3.6 Celebrate + growth: rank-up celebration vs. warm message; armies visual grows. Acceptance: first completion always promotes.
+3.7 Parent area V1-minimal: PIN gate, confirmation, delete-child; adult simple meditation on Sound Mind (no personal plan UI yet).
+3.8 Content pipeline: `content/sound-mind/*.json` schema-validated in CI; license file stored. Acceptance: 4th scripture = content-only change.
 
-**3.8 Content pipeline** — `content/sound-mind/*.json` (text, phrases, questions, audio refs) validated by schema + CI check; translation license file stored. *Accepts: adding a 4th scripture later = content-only change.*
+## Phase 4 — Full-scope slices (post-V1, in dependency order)
 
-## Phase 4 — Safety, QA, family testing
+4.1 Multi-child + adult personal plan: child switcher (parent-gated add), per-child Soldier/rank/progress; `adult_progress` + adult home/plan UI reusing step templates. Acceptance: 3 children + parent plan coexist; delete one child leaves others intact.
+4.2 Entitlements + paywall (parent only): products (e.g., extra themes, rank-extension pack), sandbox-tested purchase/restore/expire; gating by `entitlements`. Acceptance: no-purchase V1 state unchanged; child can't reach paywall (automated nav test).
+4.3 Jewel economy + shop: earn jewels on completion/streak/badge (ledger reasons), spend on `shop_items` (rank-gated, equip/own), balance = ledger sum. Acceptance: double-spend impossible; history auditable.
+4.4 Streaks + badges + reminders: streak calc (timezone-safe, parent-local), badge rules engine, reminder opt-in + scheduling + disable. Acceptance: streak survives offline; badge awarded once; reminders stop on disable.
+4.5 Content expansion: new themes (content PRs only), full rank ladder art/story (General → stars → cities/continents/regions) with gentle pacing from `ranks` table. Acceptance: finishing all V1 content no longer caps progression visually.
+4.6 Pastor Chris messages: licensed clips + transcripts in `pastor_messages`, dedicated player (parent area + age-appropriate surfacing TBD), license_ref displayed in-app. Acceptance: unlicensed item can't ship (CI license check).
+4.7 Full parent dashboard: per-child streaks, time spent, stage reached per scripture; export/delete; weekly summary. Acceptance: answers PRD full-plan progress questions without exposing child PII anywhere new.
 
-- Safety audit: no ads SDKs, no chat, no mic, no prices/buy buttons, minimal-data review, deletion test. Store listing name "iMeditate", icon includes Soldier.
-- Device matrix: small phone + tablet, iOS + Android, offline, interruption (call), 5-min rule warning timing.
-- Family test (per PRD §2/§14): ≥1 family per age band, in person where possible. Measure: % start→Roar, D2/D3 return, Soldier excitement quotes, unaided setup, comprehension without adult help.
-- Tuning levers (no redesign): Mutter phrase pacing, warning timing/copy, question wording, rank thresholds.
+## Phase 5 — Safety, compliance, store readiness
 
-## Risks → mitigations (from PRD §13)
+- Kids safety: no ads SDKs, no chat, no mic, no prices in child flows, minimal data (nickname + age group), private storage, parent delete anytime (PRD §11). Age-rating questionnaires (Apple Kids category, Google Designed for Families if pursued) answered from this doc.
+- Privacy law: COPPA/GDPR-K posture — parental consent at signup, data-minimization review, retention/deletion policy, DPA with Supabase/RevenueCat/Sentry; analytics contains no child PII.
+- Store assets: name "iMeditate", Soldier icon, screenshots per age band, privacy policy + terms + support URL, permission justifications (notifications only, parent-initiated).
+- Acceptance: pre-submission checklist signed; mic/ads SDK scan clean; deletion end-to-end verified.
 
-- 20 Mutter reps feel long → phrase-pacing config + observe, don't cut count first.
-- 5-min rule harsh → 4:30 warning + kept Ponder work + call-pause; log restarts.
-- 4–17 range → per-age-group copy/art + test each band.
-- Soldier appeal → ask directly in tests; defer companion-choice to post-V1.
-- Translation + Pastor Chris permissions → translation now (blocks V1), Pastor Chris request starts now for later.
+## Phase 6 — DevOps, QA, family testing, launch
 
-## Proposed build order summary
+- Env: `dev/internal/prod` (EAS channels + Supabase projects); migrations forward-only; content PRs validated by CI; EAS Build + Submit; Sentry releases tied to build numbers.
+- QA matrix: small phone + tablet × iOS/Android; offline; call interruption; 5-min warning timing; PIN brute-force lockout; purchase sandbox + restore + refund; reminder on/off.
+- Family testing (PRD §2/§14): ≥1 family per age band, in person where possible. Metrics: % start→Roar, D2/D3 return, Soldier excitement, unaided setup, comprehension without adult help. Tuning levers without redesign: Mutter pacing, warning copy/timing, question wording, rank/XP curve, reminder timing.
+- Launch readiness: translation license filed, Soldier/ranks/icon final, support inbox, rollback plan (EAS channel rollback + migration compatibility).
 
-0B decisions → 1.1 tokens → 2.1 model/rules → 1.2 components → 3.1 onboarding → 3.2 home → 3.3–3.6 steps → 3.7 parent → 1.3/3.8 polish + content → Phase 4 tests. Content track (0A) runs parallel from day one.
+## Build order summary
+
+0B decisions → DB migration (full schema) → 1.1 tokens → 2.1 rules engines → 1.2 components → 3.1–3.8 V1 → 4.1 multi-child/adult → 4.2 payments → 4.3–4.4 economy/engagement → 4.5–4.7 content/messages/dashboard → Phase 5–6 hardening/launch. Content/legal track (0A) runs parallel from day one.
