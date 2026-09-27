@@ -10,7 +10,7 @@
 <style>
   :root{
     --navy:#0F1E3D; --navy2:#16294f; --red:#B3202A; --red-d:#7E161D;
-    --gold:#F4B942; --parchment:#F7F4EC; --dusk:#8FA6C9; --green:#1E7D5C;
+    --gold:#F4B942; --amber:#D9772E; --parchment:#F7F4EC; --dusk:#8FA6C9; --green:#1E7D5C;
     --ink:#101828;
   }
   *{box-sizing:border-box; margin:0; padding:0}
@@ -54,9 +54,9 @@
   .phone input, .phone .field{background:#13234a; border:1px solid #2c4478; color:var(--parchment); border-radius:12px; padding:12px; width:100%; margin:6px 0; font-size:14px; font-family:inherit}
   .seg{display:flex; gap:6px; margin:8px 0}
   .seg span{flex:1; text-align:center; font-size:12px; font-weight:700; padding:9px 0; border-radius:10px; background:#13234a; color:var(--dusk); border:1px solid #2c4478}
-  .seg span.on{background:var(--red); color:#fff; border-color:var(--red)}
+  .seg span.on{background:var(--amber); color:#fff; border-color:var(--amber)}
   .btn{display:block; text-align:center; border:none; cursor:pointer; font-weight:800; border-radius:999px; padding:14px 20px; font-size:15px; font-family:inherit; margin-top:10px; text-decoration:none}
-  .btn-red{background:var(--red); color:#fff}
+  .btn-amber{background:var(--amber); color:#fff}
   .btn-gold{background:var(--gold); color:var(--ink)}
   .btn-ghost{background:transparent; color:var(--dusk); border:1.5px solid #2c4478}
   .scripture{font-size:17px; line-height:1.6; margin:12px 0}
@@ -64,7 +64,7 @@
   .rank-badge{display:inline-flex; align-items:center; gap:8px; background:#13234a; border:1px solid var(--gold); color:var(--gold); font-weight:800; font-size:13px; border-radius:999px; padding:6px 14px}
   .dots{display:flex; flex-wrap:wrap; gap:5px; margin:12px 0}
   .dots i{width:13px; height:13px; border-radius:50%; background:#22345f; border:1px solid #2c4478}
-  .dots i.f{background:var(--gold); border-color:var(--gold)}
+  .dots i.f{background:var(--amber); border-color:var(--amber)}
   .phone.roar{background:linear-gradient(165deg,var(--red),var(--red-d)); border:2px solid var(--gold)}
   .phone.roar .sub{color:#ffd9dc}
   .phone.parchment{background:var(--parchment); color:var(--ink); border:none}
@@ -86,7 +86,7 @@
   .prog-row{background:#13234a; border:1px solid #2c4478; border-radius:14px; padding:12px 14px; margin:8px 0; font-size:13.5px}
   .prog-row .tag{float:right; font-size:11px; font-weight:800; letter-spacing:1px; color:var(--dusk)}
   .focus-opt{display:inline-block; border:1.5px solid #2c4478; color:var(--dusk); border-radius:999px; padding:8px 16px; font-size:13px; font-weight:700; margin:0 6px 8px 0}
-  .focus-opt.on{background:var(--red); border-color:var(--red); color:#fff}
+  .focus-opt.on{background:var(--amber); border-color:var(--amber); color:#fff}
   .price{font-family:Fraunces,Georgia,serif; font-size:32px; font-weight:900}
   .principles{display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px}
   .pr{background:var(--navy2); border:1px solid #263c6b; border-radius:20px; padding:22px}
@@ -111,7 +111,8 @@
 <p class="lead">Six colours, each with one job. <b>Gold is reserved for moments that are earned</b> — it never appears as ordinary interface chrome.</p>
 <div class="grid6">
   <div class="sw"><div class="c" style="background:#0F1E3D; border-bottom:1px solid #263c6b"></div><div class="t"><b>Deep navy</b><code>#0F1E3D</code><p>Base ground. Home, Ponder, Mutter, app chrome.</p></div></div>
-  <div class="sw"><div class="c" style="background:#B3202A"></div><div class="t"><b>Signal red</b><code>#B3202A</code><p>Roar, primary actions, celebration.</p></div></div>
+  <div class="sw"><div class="c" style="background:#B3202A"></div><div class="t"><b>Signal red</b><code>#B3202A</code><p>Roar screen and celebration only. Never an action.</p></div></div>
+  <div class="sw"><div class="c" style="background:#D9772E"></div><div class="t"><b>Ember Amber</b><code>#D9772E</code><p>Every primary action — Start, Continue, Subscribe, Declare it.</p></div></div>
   <div class="sw"><div class="c" style="background:#F4B942"></div><div class="t"><b>Ember gold</b><code>#F4B942</code><p>Rank, jewels, badges — earned only.</p></div></div>
   <div class="sw"><div class="c" style="background:#F7F4EC"></div><div class="t"><b>Parchment</b><code>#F7F4EC</code><p>Ponder's writing surface. Warmth, not glare.</p></div></div>
   <div class="sw"><div class="c" style="background:#8FA6C9"></div><div class="t"><b>Dusk blue</b><code>#8FA6C9</code><p>Secondary text, quiet-state UI.</p></div></div>
@@ -142,27 +143,27 @@
 <h2 class="sec" id="onboarding"><span class="eyebrow">FLOW 1</span><br>Onboarding</h2>
 <p class="lead">Choosing who you are doubles as sign-up. A parent adds each child with the smallest amount of information possible.</p>
 <div class="phones">
-  <div class="phone"><div class="grow"><h3>Who are you?</h3><div class="sub">First screen. Determines the whole path.</div><a class="btn btn-red">I'm a parent</a><a class="btn btn-ghost">I'm meditating for myself</a></div><div class="sub">Who's here today? · Children are always added by a parent.</div></div>
-  <div class="phone"><div class="grow"><h3>Create your account</h3><div class="sub">Minimal fields. No child data collected here.</div><input value="" placeholder="Email"><input value="" placeholder="Password" type="password"><a class="btn btn-red">Continue</a></div><div class="sub">No ads. No messaging. You can delete everything at any time.</div></div>
-  <div class="phone"><div class="grow"><h3>Add your child</h3><div class="sub">We only ever ask for this much.</div><input value="" placeholder="First name or nickname"><div class="sub" style="margin:8px 0 2px">Age group</div><div class="seg"><span>4–7</span><span class="on">8–11</span><span>12–17</span></div><a class="btn btn-red">Add child</a></div><div class="sub">Only a name and an age group. Nothing else.</div></div>
-  <div class="phone"><div class="grow"><div style="text-align:center; margin:16px 0"><span class="rank-badge">RECRUIT</span></div><h3 style="text-align:center">This is your Soldier</h3><div class="sub" style="text-align:center">He grows every time you meditate. Let's begin.</div><a class="btn btn-gold">Let's go</a></div><div class="sub">Warm welcome at Recruit rank.</div></div>
+  <div class="phone"><div class="grow"><h3>Who are you?</h3><div class="sub">First screen. Determines the whole path.</div><a class="btn btn-amber">I'm a parent</a><a class="btn btn-ghost">I'm meditating for myself</a></div><div class="sub">Who's here today? · Children are always added by a parent.</div></div>
+  <div class="phone"><div class="grow"><h3>Create your account</h3><div class="sub">Minimal fields. No child data collected here.</div><input value="" placeholder="Email"><input value="" placeholder="Password" type="password"><a class="btn btn-amber">Continue</a></div><div class="sub">No ads. No messaging. You can delete everything at any time.</div></div>
+  <div class="phone"><div class="grow"><h3>Add your child</h3><div class="sub">We only ever ask for this much.</div><input value="" placeholder="First name or nickname"><div class="sub" style="margin:8px 0 2px">Age group</div><div class="seg"><span>4–7</span><span class="on">8–11</span><span>12–17</span></div><a class="btn btn-amber">Add child</a></div><div class="sub">Only a name and an age group. Nothing else.</div></div>
+  <div class="phone"><div class="grow"><div style="text-align:center; margin:16px 0"><span class="rank-badge">RECRUIT</span></div><h3 style="text-align:center">This is your Soldier</h3><div class="sub" style="text-align:center">He grows every time you meditate. Let's begin.</div><a class="btn btn-amber">Let's go</a></div><div class="sub">Warm welcome at Recruit rank.</div></div>
 </div>
 
 <h2 class="sec" id="steps"><span class="eyebrow">FLOW 2 · CORE</span><br>Home and the three steps</h2>
 <p class="lead">The palette narrows as focus deepens. Home is calm and ready. Ponder strips to near-monochrome stillness. Mutter holds a steady, repeated rhythm. <b>Roar is the only screen allowed to go fully loud.</b></p>
 <div class="phones">
-  <div class="phone"><div class="grow"><span class="rank-badge">SERGEANT · 3 in his army</span><h3 style="margin-top:12px">Today</h3><div class="scripture">Be strong and courageous</div><a class="btn btn-red">Start</a><a class="btn btn-ghost">Browse themes ›</a></div><div class="sub">Home — Soldier, today's scripture, browse themes.</div></div>
-  <div class="phone parchment"><div class="grow"><h3 class="serif">Ponder</h3><div class="sub">Read, question, imagine. No timer.</div><div class="scripture">"Be strong and courageous. Do not be afraid."</div><div class="q">Where are you in this scene?</div><a class="btn btn-red">I'm done</a></div><div class="sub">Home · My journey</div></div>
+  <div class="phone"><div class="grow"><span class="rank-badge">SERGEANT · 3 in his army</span><h3 style="margin-top:12px">Today</h3><div class="scripture">Be strong and courageous</div><a class="btn btn-amber">Start</a><a class="btn btn-ghost">Browse themes ›</a></div><div class="sub">Home — Soldier, today's scripture, browse themes.</div></div>
+  <div class="phone parchment"><div class="grow"><h3 class="serif">Ponder</h3><div class="sub">Read, question, imagine. No timer.</div><div class="scripture">"Be strong and courageous. Do not be afraid."</div><div class="q">Where are you in this scene?</div><a class="btn btn-amber">I'm done</a></div><div class="sub">Home · My journey</div></div>
   <div class="phone"><div class="grow"><h3>Mutter</h3><div class="sub">Phrase by phrase, 20 times. Counter, soft sound. · Soft sound on</div><div class="scripture">"…do not be afraid…"</div><div class="dots"><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="sub">7 of 20 — the row itself shows the journey, never a number alone.</div></div><div class="sub">Home · My journey</div></div>
-  <div class="phone roar"><div class="grow"><div class="sub">ROAR · LOUD, BOLD, JOYFUL</div><div class="roar-word">"I will fear <mark>no evil</mark>, for You are <mark>with me!</mark>"</div><a class="btn btn-gold">Declare it</a></div><div class="sub">Words light up.</div></div>
-  <div class="phone"><div class="grow" style="text-align:center"><div class="sub">RANK-UP CELEBRATION · only on promotion</div><div class="serif" style="font-size:32px; font-weight:900; color:var(--gold)">PROMOTED<br>Captain!</div><p style="margin:10px 0">4 soldiers now stand with you</p><a class="btn btn-gold">Continue</a></div></div>
-  <div class="phone"><div class="grow" style="text-align:center"><div class="sub">COMPLETION · ordinary days</div><h3 class="serif">Well done today</h3><p>You earned <b style="color:var(--gold)">3 jewels</b>.<br>Your Soldier is proud of you.</p><a class="btn btn-red">See you tomorrow</a></div></div>
+  <div class="phone roar"><div class="grow"><div class="sub">ROAR · LOUD, BOLD, JOYFUL</div><div class="roar-word">"I will fear <mark>no evil</mark>, for You are <mark>with me!</mark>"</div><a class="btn btn-amber">Declare it</a></div><div class="sub">Words light up.</div></div>
+  <div class="phone"><div class="grow" style="text-align:center"><div class="sub">RANK-UP CELEBRATION · only on promotion</div><div class="serif" style="font-size:32px; font-weight:900; color:var(--gold)">PROMOTED<br>Captain!</div><p style="margin:10px 0">4 soldiers now stand with you</p><a class="btn btn-amber">Continue</a></div></div>
+  <div class="phone"><div class="grow" style="text-align:center"><div class="sub">COMPLETION · ordinary days</div><h3 class="serif">Well done today</h3><p>You earned <b style="color:var(--gold)">3 jewels</b>.<br>Your Soldier is proud of you.</p><a class="btn btn-amber">See you tomorrow</a></div></div>
 </div>
 
 <h2 class="sec" id="journey"><span class="eyebrow">FLOW 3</span><br>My Journey</h2>
 <p class="lead">One button off the home screen holds everything else, so home stays uncluttered: the treasure chest, streak, badges, and the jewel shop for Soldier extras.</p>
 <div class="phones">
-  <div class="phone"><div class="grow"><h3>My journey</h3><div class="jewel-row"><div class="jewel-stat"><div class="v">37</div><div class="l">jewels</div></div><div class="jewel-stat"><div class="v" style="color:#7fd6ae">5</div><div class="l">day streak</div></div></div><div class="sub">Badges</div><div class="dots"><i class="f"></i><i class="f"></i><i class="f"></i><i></i><i></i><i></i></div><div class="sub" style="margin-top:10px">Treasure chest — fills as new scriptures are completed.</div><div class="scripture" style="font-size:14px">37 jewels — spend them on your Soldier</div><a class="btn btn-gold">Open the shop</a></div><div class="sub">Home · My journey</div></div>
+  <div class="phone"><div class="grow"><h3>My journey</h3><div class="jewel-row"><div class="jewel-stat"><div class="v">37</div><div class="l">jewels</div></div><div class="jewel-stat"><div class="v" style="color:#7fd6ae">5</div><div class="l">day streak</div></div></div><div class="sub">Badges</div><div class="dots"><i class="f"></i><i class="f"></i><i class="f"></i><i></i><i></i><i></i></div><div class="sub" style="margin-top:10px">Treasure chest — fills as new scriptures are completed.</div><div class="scripture" style="font-size:14px">37 jewels — spend them on your Soldier</div><a class="btn btn-amber">Open the shop</a></div><div class="sub">Home · My journey</div></div>
   <div class="phone"><div class="grow"><h3>Soldier shop</h3><div class="sub">Jewels buy extras — uniform, banner, armor.</div><div class="shop-item"><div class="art"></div><div>Banner</div><div class="p">◆ 12</div></div><div class="shop-item"><div class="art"></div><div>Armor plate</div><div class="p">◆ 20</div></div><div class="shop-item"><div class="art"></div><div>Field cloak</div><div class="p">◆ 15</div></div></div><div class="sub">Home · My journey</div></div>
 </div>
 
@@ -172,12 +173,12 @@
   <div class="phone"><div class="grow"><h3>Enter parent PIN</h3><div class="sub">Simple, not punitive.</div><div class="seg"><span>1</span><span>2</span><span>3</span></div><div class="seg"><span>4</span><span>5</span><span>6</span></div><div class="seg"><span>7</span><span>8</span><span>9</span></div></div></div>
   <div class="phone"><div class="grow"><h3>Amara's progress</h3><div class="sub">5 day streak · 12 min this week</div><div class="prog-row">Be strong and courageous <span class="tag">ROAR</span></div><div class="prog-row">The Lord is my shepherd <span class="tag">MUTTER</span></div><div class="prog-row">I can do all things <span class="tag">PONDER</span></div></div><div class="sub">Streak, scriptures, step reached, time spent.</div></div>
   <div class="phone"><div class="grow"><h3>This week's focus</h3><div class="sub">Parent and child choose a theme together.</div><div><span class="focus-opt on">Courage</span><span class="focus-opt">Sound mind</span><span class="focus-opt">Trusting God</span><span class="focus-opt">Peace</span></div></div></div>
-  <div class="phone"><div class="grow"><h3>The full library</h3><div class="sub">Amara finished Sound Mind. Unlock every theme for the whole family — up to 5 children.</div><div class="price">$7.99/mo</div><a class="btn btn-red">Subscribe</a></div><div class="sub">Subscription · parent-only. A child never sees a price.</div></div>
+  <div class="phone"><div class="grow"><h3>The full library</h3><div class="sub">Amara finished Sound Mind. Unlock every theme for the whole family — up to 5 children.</div><div class="price">$7.99/mo</div><a class="btn btn-amber">Subscribe</a></div><div class="sub">Subscription · parent-only. A child never sees a price.</div></div>
 </div>
 
 <h2 class="sec" id="components"><span class="eyebrow">FOUNDATION</span><br>Components</h2>
 <p class="lead">The recurring pieces used to build every screen above.</p>
-<div class="type-card"><small>BUTTONS</small><p style="color:var(--dusk); font-size:13px; margin:6px 0 12px">Red for primary progression. Gold only for Roar and reward moments. Ghost for secondary, low-emphasis actions.</p><div style="display:flex; gap:10px; flex-wrap:wrap"><a class="btn btn-red" style="margin:0">Continue</a><a class="btn btn-gold" style="margin:0">Declare it</a><a class="btn btn-ghost" style="margin:0">Not now</a></div></div>
+<div class="type-card"><small>BUTTONS</small><p style="color:var(--dusk); font-size:13px; margin:6px 0 12px">Ember Amber for every primary action — I'm a parent, Add child, Let's go, Start, Continue, Subscribe, Declare it. Red never acts; it means Roar and celebration only. Gold stays earned-only (rank, jewels, badges). Ghost for secondary, low-emphasis actions.</p><div style="display:flex; gap:10px; flex-wrap:wrap"><a class="btn btn-amber" style="margin:0">Continue</a><a class="btn btn-ghost" style="margin:0">Not now</a></div></div>
 <div class="type-card"><small>PROGRESS DOTS — MUTTER</small><p style="color:var(--dusk); font-size:13px; margin:6px 0">Filled dot = one repetition said. Never a numeric-only counter — the row itself shows the whole journey to 20.</p><div class="dots"><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
 <div class="type-card"><small>RANK BADGE · STREAK CHIP</small><div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:8px"><span class="rank-badge">CAPTAIN · 4 soldiers</span><span class="streak-chip">5 day streak</span></div></div>
 <div class="type-card"><small>FOCUS WARNING</small><div class="warn"><b>Your Soldier is waiting</b><p>Come back in the next minute to keep your place.</p></div></div>
