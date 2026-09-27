@@ -50,7 +50,7 @@ Source of truth: `iMeditate_PRD_A_Small_First_Version.md` + `README.md`.
 - Better Auth: email magic-link (parent only, SMTP via free tier e.g. Resend free / Gmail app password for dev), sessions stored in local Postgres, PIN hash checked at parent-area gate. Children never authenticate — all child writes go through parent session + `parent_id` ownership check in API middleware.
 - R2: private bucket; API mints presigned PUT (Ponder PNG upload) and presigned GET (audio/message streaming); keys `/{parentId}/{childId}/...`. Bundled V1 audio ships in-app; R2 path exercised by artifact uploads from day one.
 - Public-URL note: store/payment webhooks (post-V1 sandbox tests) need a public endpoint → use Cloudflare Tunnel (`cloudflared`) pointed at local API only during webhook testing. No permanent hosting.
-- Acceptance: cold start = `docker compose up`; magic-link login works from physical device over LAN; presigned R2 round-trip verified.
+- Acceptance: cold start = `cp server/.env.example server/.env && docker compose up` (Postgres healthy → API `/health` ok); magic-link login works from physical device over LAN once Phase 2 lands; presigned R2 round-trip verified.
 
 ### 2.1 Database (local Postgres — build full schema in V1, enforce V1 subset in app)
 
