@@ -19,7 +19,9 @@ services:
       retries: 10
 
   api:
-    build: ./server
+    build:
+      context: .
+      dockerfile: ./server/Dockerfile
     container_name: imeditate-api
     restart: unless-stopped
     depends_on:
