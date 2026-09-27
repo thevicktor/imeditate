@@ -184,6 +184,15 @@ app.get("/media/:name", async (c) => {
     return c.json({ error: "not found" }, 404);
   }
 });
+// --- preview page (single-file demo of this phase; same origin, no CORS) ---
+app.get("/preview", async (c) => {
+  try {
+    const html = await readFile(new URL("../public/preview.html", import.meta.url));
+    return new Response(html, { headers: { "content-type": "text/html" } });
+  } catch {
+    return c.json({ error: "preview not found" }, 404);
+  }
+});
 app.get("/api/wallet/:childId", async (c) => {
   const p = await requireParent(c);
   if (p?.error) return p;
