@@ -3,165 +3,194 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>iMeditate — Design System Showcase (V1)</title>
+<title>iMeditate — Design System (V1)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,900&family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --midnight:#0A1633; --navy:#14264F; --royal:#23408F; --bright:#2F6BFF; --sky:#9DBCFF;
-    --crimson:#C81E3A; --ember:#FF5A5A; --gold:#F5B301; --parchment:#F7F3EA;
-    --ink:#101828; --slate:#475467; --success:#12B76A;
+    --navy:#0F1E3D; --navy2:#16294f; --red:#B3202A; --red-d:#7E161D;
+    --gold:#F4B942; --parchment:#F7F4EC; --dusk:#8FA6C9; --green:#1E7D5C;
+    --ink:#101828;
   }
   *{box-sizing:border-box; margin:0; padding:0}
-  body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro",Inter,Segoe UI,sans-serif; background:var(--midnight); color:var(--parchment); line-height:1.5}
-  .wrap{max-width:1080px; margin:0 auto; padding:40px 24px 80px}
-  .brand{display:flex; align-items:center; gap:16px; margin-bottom:8px}
-  .mark{width:56px; height:56px; background:linear-gradient(160deg,var(--crimson),#7A1030); border-radius:16px; display:flex; align-items:center; justify-content:center; border:2px solid var(--gold)}
-  .mark svg{width:32px; height:32px}
-  h1{font-size:28px; font-weight:800}
-  .sub{color:var(--sky); margin-bottom:32px}
-  h2{font-size:20px; font-weight:700; margin:48px 0 16px; padding-top:24px; border-top:1px solid var(--royal)}
-  h2 span{color:var(--gold); font-weight:500; font-size:13px; margin-left:8px}
-  p.note{color:var(--sky); font-size:14px; margin-bottom:16px}
-  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px}
-  .swatch{border-radius:16px; overflow:hidden; border:1px solid rgba(255,255,255,.12)}
-  .swatch .c{height:72px}
-  .swatch .t{background:var(--navy); padding:8px 12px; font-size:13px}
-  .swatch .t b{display:block; font-size:13px}
-  .swatch .t code{color:var(--sky); font-size:12px}
-  .moods{display:grid; grid-template-columns:1fr 1fr; gap:16px}
-  @media(max-width:700px){.moods{grid-template-columns:1fr}}
-  .mood{border-radius:24px; padding:32px 28px; min-height:220px}
-  .mood.calm{background:linear-gradient(180deg,var(--navy),var(--midnight)); border:1px solid var(--royal)}
-  .mood.bold{background:linear-gradient(160deg,var(--crimson),#7A1030); border:2px solid var(--gold)}
-  .mood small{display:block; font-size:13px; opacity:.75; margin-bottom:8px}
-  .mood h3{font-size:28px; font-weight:800; margin-bottom:8px}
-  .type-row{background:var(--navy); border-radius:16px; padding:16px 20px; margin-bottom:8px; border:1px solid var(--royal)}
-  .type-row small{color:var(--sky); font-size:12px; display:block; margin-top:4px}
-  .btn{display:inline-block; border:none; cursor:pointer; font-weight:800; border-radius:999px; padding:14px 32px; font-size:17px}
-  .btn-start{background:linear-gradient(160deg,var(--crimson),#8f1230); color:#fff; border:2px solid var(--gold); font-size:20px; padding:18px 56px; box-shadow:0 8px 32px rgba(200,30,58,.45)}
-  .btn-primary{background:var(--bright); color:#fff}
-  .btn-ghost{background:transparent; color:var(--sky); border:2px solid var(--royal)}
-  .card{background:var(--navy); border:1px solid var(--royal); border-radius:20px; padding:20px; margin-bottom:12px}
-  .steps{display:flex; gap:8px; margin:12px 0}
-  .step{flex:1; text-align:center; font-size:13px; font-weight:700; padding:10px 4px; border-radius:12px; background:#0d1c42; color:var(--sky); border:1px solid var(--royal)}
-  .step.done{background:var(--success); color:#fff; border-color:var(--success)}
-  .step.now{background:var(--bright); color:#fff; border-color:var(--bright)}
-  .counter{display:flex; align-items:center; gap:16px}
-  .counter .n{font-size:40px; font-weight:800; color:var(--gold)}
-  .bar{height:12px; background:#0d1c42; border-radius:999px; overflow:hidden; flex:1}
-  .bar i{display:block; height:100%; width:70%; background:linear-gradient(90deg,var(--bright),var(--sky)); border-radius:999px}
-  .soldiers{display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:12px}
-  .soldier{background:var(--navy); border:1px solid var(--royal); border-radius:20px; padding:20px; text-align:center}
-  .avatar{width:88px; height:88px; margin:0 auto 12px; border-radius:50%; display:flex; align-items:center; justify-content:center; position:relative}
-  .avatar.playful{background:linear-gradient(160deg,var(--bright),var(--royal)); border:3px solid var(--sky)}
-  .avatar.heroic{background:linear-gradient(160deg,#2a2f45,#101328); border:3px solid var(--gold)}
-  .chev{position:absolute; bottom:-8px; left:50%; transform:translateX(-50%); background:var(--gold); color:var(--ink); font-size:11px; font-weight:800; border-radius:999px; padding:2px 10px; white-space:nowrap}
+  body{font-family:Inter,-apple-system,Segoe UI,sans-serif; background:var(--navy); color:var(--parchment); line-height:1.55; font-size:15px}
+  .serif{font-family:Fraunces,Georgia,serif}
+  .wrap{max-width:1120px; margin:0 auto; padding:0 24px 90px}
+  nav.top{position:sticky; top:0; z-index:50; background:rgba(15,30,61,.96); border-bottom:1px solid #263c6b; padding:12px 24px; display:flex; gap:18px; flex-wrap:wrap; font-size:12px; font-weight:700}
+  nav.top a{color:var(--dusk); text-decoration:none; letter-spacing:.4px}
+  nav.top a:hover{color:var(--gold)}
+  nav.top .sys{color:var(--parchment); margin-right:auto; letter-spacing:2px}
+  header.hero{padding:72px 0 12px}
+  header.hero .kicker{font-size:12px; letter-spacing:3px; color:var(--dusk); font-weight:700}
+  header.hero h1{font-family:Fraunces,Georgia,serif; font-weight:900; font-size:40px; margin:10px 0 14px; line-height:1.1}
+  header.hero p{max-width:640px; color:var(--dusk); font-size:17px}
+  h2.sec{font-family:Fraunces,Georgia,serif; font-size:28px; font-weight:700; margin:64px 0 6px}
+  .eyebrow{font-size:12px; letter-spacing:3px; color:var(--dusk); font-weight:700}
+  p.lead{color:var(--dusk); margin:6px 0 20px; max-width:680px}
+  p.lead b, p.lead strong{color:var(--parchment)}
+  .grid6{display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px}
+  .sw{border-radius:18px; overflow:hidden; border:1px solid #263c6b; background:var(--navy2)}
+  .sw .c{height:84px}
+  .sw .t{padding:12px 14px}
+  .sw .t b{font-size:14px; display:block}
+  .sw .t code{font-size:12px; color:var(--dusk)}
+  .sw .t p{font-size:12.5px; color:var(--dusk); margin-top:6px}
+  .type-card{background:var(--navy2); border:1px solid #263c6b; border-radius:20px; padding:28px; margin-bottom:12px}
+  .type-card small{color:var(--dusk); font-size:12px; letter-spacing:2px; font-weight:700}
+  .scale-row{display:flex; align-items:baseline; gap:16px; padding:10px 0; border-bottom:1px dashed #2c4478}
+  .scale-row:last-child{border:none}
+  .scale-row .lab{margin-left:auto; font-size:12px; color:var(--dusk); white-space:nowrap}
   .ages{display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:12px}
-  .age{background:var(--navy); border:1px solid var(--royal); border-radius:20px; padding:20px}
-  .age b.band{color:var(--gold)}
-  .age .copy{font-size:15px; margin-top:8px}
-  .age .copy.big{font-size:22px}
-  .phones{display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px}
-  .phone{border-radius:32px; padding:24px 20px; min-height:420px; border:1px solid var(--royal)}
-  .phone.calm{background:linear-gradient(180deg,#101f4b,var(--midnight))}
-  .phone.roar{background:linear-gradient(160deg,var(--crimson),#7A1030); border:2px solid var(--gold)}
-  .phone small.tt{font-size:12px; font-weight:800; letter-spacing:2px; opacity:.7}
-  .phone h3{font-size:22px; margin:8px 0 12px}
-  .verse{background:rgba(255,255,255,.08); border-radius:14px; padding:14px; font-size:15px; margin:12px 0}
-  .verse .lit{background:var(--gold); color:var(--ink); border-radius:4px; padding:0 4px; font-weight:800}
-  .q{background:rgba(47,107,255,.15); border:1px solid var(--royal); border-radius:14px; padding:12px; font-size:14px; margin:8px 0}
-  .celebrate{background:linear-gradient(160deg,var(--crimson),#7A1030); border:2px solid var(--gold); border-radius:20px; padding:28px 24px; text-align:center}
-  .celebrate .t{font-size:32px; font-weight:800}
-  footer{margin-top:64px; color:var(--sky); font-size:13px; border-top:1px solid var(--royal); padding-top:16px}
-  code.inline{background:#0d1c42; padding:2px 8px; border-radius:6px; font-size:12px; color:var(--sky)}
+  .age{background:var(--navy2); border:1px solid #263c6b; border-radius:20px; padding:22px}
+  .age .band{color:var(--gold); font-weight:800; font-size:13px; letter-spacing:1px}
+  .age h3{font-size:17px; margin:6px 0}
+  .age p{color:var(--dusk); font-size:14px}
+  .phones{display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:16px}
+  .phone{background:#0b1730; border:1px solid #2c4478; border-radius:30px; padding:26px 20px; min-height:380px; display:flex; flex-direction:column}
+  .phone h3{font-size:20px; margin:4px 0 4px}
+  .phone .sub{color:var(--dusk); font-size:13px; margin-bottom:14px}
+  .phone .grow{flex:1}
+  .phone input, .phone .field{background:#13234a; border:1px solid #2c4478; color:var(--parchment); border-radius:12px; padding:12px; width:100%; margin:6px 0; font-size:14px; font-family:inherit}
+  .seg{display:flex; gap:6px; margin:8px 0}
+  .seg span{flex:1; text-align:center; font-size:12px; font-weight:700; padding:9px 0; border-radius:10px; background:#13234a; color:var(--dusk); border:1px solid #2c4478}
+  .seg span.on{background:var(--red); color:#fff; border-color:var(--red)}
+  .btn{display:block; text-align:center; border:none; cursor:pointer; font-weight:800; border-radius:999px; padding:14px 20px; font-size:15px; font-family:inherit; margin-top:10px; text-decoration:none}
+  .btn-red{background:var(--red); color:#fff}
+  .btn-gold{background:var(--gold); color:var(--ink)}
+  .btn-ghost{background:transparent; color:var(--dusk); border:1.5px solid #2c4478}
+  .scripture{font-size:17px; line-height:1.6; margin:12px 0}
+  .q{background:#13234a; border:1px solid #2c4478; border-radius:14px; padding:12px 14px; font-size:14px; margin:8px 0; color:var(--parchment)}
+  .rank-badge{display:inline-flex; align-items:center; gap:8px; background:#13234a; border:1px solid var(--gold); color:var(--gold); font-weight:800; font-size:13px; border-radius:999px; padding:6px 14px}
+  .dots{display:flex; flex-wrap:wrap; gap:5px; margin:12px 0}
+  .dots i{width:13px; height:13px; border-radius:50%; background:#22345f; border:1px solid #2c4478}
+  .dots i.f{background:var(--gold); border-color:var(--gold)}
+  .phone.roar{background:linear-gradient(165deg,var(--red),var(--red-d)); border:2px solid var(--gold)}
+  .phone.roar .sub{color:#ffd9dc}
+  .phone.parchment{background:var(--parchment); color:var(--ink); border:none}
+  .phone.parchment .sub{color:#6b6f76}
+  .phone.parchment .q{background:#fff; border-color:#e3dcc9; color:var(--ink)}
+  .roar-word{font-family:Fraunces,Georgia,serif; font-weight:900; font-size:26px; line-height:1.25; margin:10px 0}
+  .roar-word mark{background:var(--gold); color:var(--ink); border-radius:6px; padding:0 6px}
+  .streak-chip{display:inline-flex; align-items:center; gap:6px; background:rgba(30,125,92,.16); border:1px solid var(--green); color:#7fd6ae; font-weight:800; font-size:13px; border-radius:999px; padding:6px 14px}
+  .warn{background:#13234a; border:1px solid var(--gold); border-radius:16px; padding:16px; margin-top:12px}
+  .warn b{color:var(--gold)}
+  .warn p{font-size:13px; color:var(--dusk)}
+  .jewel-row{display:flex; gap:14px; margin:12px 0}
+  .jewel-stat{flex:1; background:#13234a; border:1px solid #2c4478; border-radius:16px; padding:14px; text-align:center}
+  .jewel-stat .v{font-family:Fraunces,Georgia,serif; font-size:28px; font-weight:900; color:var(--gold)}
+  .jewel-stat .l{font-size:12px; color:var(--dusk)}
+  .shop-item{display:flex; align-items:center; gap:12px; background:#13234a; border:1px solid #2c4478; border-radius:14px; padding:12px 14px; margin:8px 0}
+  .shop-item .art{width:44px; height:44px; border-radius:12px; background:linear-gradient(160deg,#2c4478,#13234a); border:1px solid #2c4478; flex:none}
+  .shop-item .p{margin-left:auto; color:var(--gold); font-weight:800}
+  .prog-row{background:#13234a; border:1px solid #2c4478; border-radius:14px; padding:12px 14px; margin:8px 0; font-size:13.5px}
+  .prog-row .tag{float:right; font-size:11px; font-weight:800; letter-spacing:1px; color:var(--dusk)}
+  .focus-opt{display:inline-block; border:1.5px solid #2c4478; color:var(--dusk); border-radius:999px; padding:8px 16px; font-size:13px; font-weight:700; margin:0 6px 8px 0}
+  .focus-opt.on{background:var(--red); border-color:var(--red); color:#fff}
+  .price{font-family:Fraunces,Georgia,serif; font-size:32px; font-weight:900}
+  .principles{display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px}
+  .pr{background:var(--navy2); border:1px solid #263c6b; border-radius:20px; padding:22px}
+  .pr .n{color:var(--gold); font-family:Fraunces,Georgia,serif; font-weight:900; font-size:22px}
+  .pr h3{font-size:16px; margin:8px 0 6px}
+  .pr p{font-size:13.5px; color:var(--dusk)}
+  footer{margin-top:72px; border-top:1px solid #263c6b; padding-top:16px; color:var(--dusk); font-size:12.5px}
+  footer code{background:#0b1730; padding:2px 8px; border-radius:6px; color:var(--dusk)}
 </style>
 </head>
 <body>
+<nav class="top"><span class="sys">DESIGN SYSTEM · V1</span><a href="#colour">Colour</a><a href="#type">Type</a><a href="#onboarding">Onboarding</a><a href="#steps">Steps</a><a href="#journey">My Journey</a><a href="#parent">Parent area</a><a href="#components">Components</a><a href="#principles">Principles</a></nav>
 <div class="wrap">
 
-  <div class="brand">
-    <div class="mark">
-      <svg viewBox="0 0 24 24" fill="none"><path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5l8-3z" fill="#F5B301"/><path d="M12 5l4.5 1.7v3.6c0 3-2 5.4-4.5 6.7-2.5-1.3-4.5-3.7-4.5-6.7V6.7L12 5z" fill="#C81E3A"/></svg>
-    </div>
-    <div>
-      <h1>iMeditate — Design System</h1>
-      <div class="sub">V1 · tokens v0.1.0 · deep blues &amp; reds · calm → bold</div>
-    </div>
-  </div>
+<header class="hero">
+  <div class="kicker">DESIGN SYSTEM · V1</div>
+  <h1>iMeditate</h1>
+  <p>A meditation companion for children and adults, built around three steps drawn from the Hebrew word <i>hagar</i>: ponder, mutter, and roar. Bold and adventurous, deep blue and red, with a Soldier who grows alongside every person who uses it.</p>
+</header>
 
-  <h2>1 · Palette <span>design/tokens.json</span></h2>
-  <p class="note">Bold and adventurous. Deep blues carry the calm screens; reds + gold carry Roar and celebration.</p>
-  <div class="grid">
-    <div class="swatch"><div class="c" style="background:#0A1633"></div><div class="t"><b>Midnight</b><code>#0A1633</code></div></div>
-    <div class="swatch"><div class="c" style="background:#14264F"></div><div class="t"><b>Navy</b><code>#14264F</code></div></div>
-    <div class="swatch"><div class="c" style="background:#23408F"></div><div class="t"><b>Royal</b><code>#23408F</code></div></div>
-    <div class="swatch"><div class="c" style="background:#2F6BFF"></div><div class="t"><b>Bright Blue</b><code>#2F6BFF</code></div></div>
-    <div class="swatch"><div class="c" style="background:#9DBCFF"></div><div class="t"><b>Sky Blue</b><code>#9DBCFF</code></div></div>
-    <div class="swatch"><div class="c" style="background:#C81E3A"></div><div class="t"><b>Crimson</b><code>#C81E3A</code></div></div>
-    <div class="swatch"><div class="c" style="background:#FF5A5A"></div><div class="t"><b>Ember</b><code>#FF5A5A</code></div></div>
-    <div class="swatch"><div class="c" style="background:#F5B301"></div><div class="t"><b>Gold</b><code>#F5B301</code></div></div>
-    <div class="swatch"><div class="c" style="background:#F7F3EA"></div><div class="t"><b>Parchment</b><code>#F7F3EA</code></div></div>
-    <div class="swatch"><div class="c" style="background:#12B76A"></div><div class="t"><b>Success</b><code>#12B76A</code></div></div>
-  </div>
+<h2 class="sec" id="colour"><span class="eyebrow">FOUNDATION</span><br>Colour</h2>
+<p class="lead">Six colours, each with one job. <b>Gold is reserved for moments that are earned</b> — it never appears as ordinary interface chrome.</p>
+<div class="grid6">
+  <div class="sw"><div class="c" style="background:#0F1E3D; border-bottom:1px solid #263c6b"></div><div class="t"><b>Deep navy</b><code>#0F1E3D</code><p>Base ground. Home, Ponder, Mutter, app chrome.</p></div></div>
+  <div class="sw"><div class="c" style="background:#B3202A"></div><div class="t"><b>Signal red</b><code>#B3202A</code><p>Roar, primary actions, celebration.</p></div></div>
+  <div class="sw"><div class="c" style="background:#F4B942"></div><div class="t"><b>Ember gold</b><code>#F4B942</code><p>Rank, jewels, badges — earned only.</p></div></div>
+  <div class="sw"><div class="c" style="background:#F7F4EC"></div><div class="t"><b>Parchment</b><code>#F7F4EC</code><p>Ponder's writing surface. Warmth, not glare.</p></div></div>
+  <div class="sw"><div class="c" style="background:#8FA6C9"></div><div class="t"><b>Dusk blue</b><code>#8FA6C9</code><p>Secondary text, quiet-state UI.</p></div></div>
+  <div class="sw"><div class="c" style="background:#1E7D5C"></div><div class="t"><b>Growth green</b><code>#1E7D5C</code><p>Streaks and progress — distinct from reward gold.</p></div></div>
+</div>
 
-  <h2>2 · Moods <span>calm vs bold</span></h2>
-  <p class="note">The mood shifts with the step: quieter and steadier on Home / Ponder / Mutter, bolder and livelier for Roar and rank-up.</p>
-  <div class="moods">
-    <div class="mood calm"><small>CALM — HOME · PONDER · MUTTER</small><h3>Be still and ponder</h3><p>Steady navy, soft blue accents. Gentle 300ms motion.</p></div>
-    <div class="mood bold"><small>BOLD — ROAR · RANK-UP</small><h3>ROAR it out loud!</h3><p>Crimson energy, gold trim. Celebratory spring motion.</p></div>
-  </div>
+<h2 class="sec" id="type"><span class="eyebrow">FOUNDATION</span><br>Typography</h2>
+<p class="lead">Two families. <b>Fraunces carries the brand voice</b> — headlines, the Soldier's story, celebration moments. <b>Inter carries everything read for information</b>: scripture, questions, and interface text, legible at every age from 4 to 17.</p>
+<div class="type-card"><small>DISPLAY — FRAUNCES</small><div class="serif" style="font-size:40px; font-weight:900">Roar it out</div><p style="color:var(--dusk); font-size:13px; margin-top:6px">Used for headlines, the Soldier's rank, and celebration screens. Never for scripture text.</p></div>
+<div class="type-card"><small>BODY — INTER</small><div style="font-size:20px">Be strong and courageous</div><p style="color:var(--dusk); font-size:13px; margin-top:6px">Used for scripture, guiding questions, and all interface labels. Plain and legible, never decorated.</p></div>
+<div class="type-card"><small>TYPE SCALE</small>
+  <div class="scale-row"><span class="serif" style="font-size:40px; font-weight:900">Aa</span><span class="lab">Display / 40</span></div>
+  <div class="scale-row"><span style="font-size:28px; font-weight:800">Aa</span><span class="lab">H1 / 28 — screen titles</span></div>
+  <div class="scale-row"><span style="font-size:20px; font-weight:700">Aa</span><span class="lab">H2 / 20 — section headers</span></div>
+  <div class="scale-row"><span style="font-size:17px; line-height:1.6">Aa</span><span class="lab">Scripture / 17 — 1.6 line height</span></div>
+  <div class="scale-row"><span style="font-size:15px">Aa</span><span class="lab">Body / 15 — questions, descriptions</span></div>
+  <div class="scale-row"><span style="font-size:12px; font-weight:700">Aa</span><span class="lab">Label / 12 — buttons, tags, captions</span></div>
+</div>
 
-  <h2>3 · Typography <span>read-aloud-first at 4–7</span></h2>
-  <div class="type-row" style="font-size:40px; font-weight:800">I can do all things<small>display · 40 · Roar declarations, celebrations</small></div>
-  <div class="type-row" style="font-size:28px; font-weight:800">Today's scripture<small>h1 · 28 · screen titles</small></div>
-  <div class="type-row" style="font-size:22px; font-weight:500">Where are you in this story? <small>bodyLarge · 22 · default for ages 4–7</small></div>
-  <div class="type-row" style="font-size:17px">Picture yourself inside the verse…<small>body · 17 · default 8–17</small></div>
+<h2 class="sec"><span class="eyebrow">FOUNDATION</span><br>Adapting across ages 4–17</h2>
+<p class="lead">The token system never changes. What flexes is <b>wording and the Soldier's illustration style</b> — never layout, colour, or interaction pattern.</p>
+<div class="ages">
+  <div class="age"><div class="band">AGES 4–7</div><h3>Very simple words</h3><p>Everything read aloud. Soldier is round, friendly, exaggerated.</p></div>
+  <div class="age"><div class="band">AGES 8–11</div><h3>Simple wording</h3><p>Reading and listening both offered. Soldier is proportioned, still warm.</p></div>
+  <div class="age"><div class="band">AGES 12–17</div><h3>Grown-up wording</h3><p>Soldier is heroic, painterly — no cartoon feel.</p></div>
+</div>
 
-  <h2>4 · Components</h2>
-  <div class="card">
-    <p class="note">Primary action — the big Start button on Home</p>
-    <button class="btn btn-start">Start</button>
-    <span style="margin:0 8px"></span>
-    <button class="btn btn-primary">I'm done</button>
-    <span style="margin:0 8px"></span>
-    <button class="btn btn-ghost">Listen again</button>
-  </div>
-  <div class="card">
-    <p class="note">Step progress — Ponder → Mutter → Roar unlock in order</p>
-    <div class="steps"><div class="step done">Ponder ✓</div><div class="step now">Mutter</div><div class="step">Roar</div></div>
-  </div>
-  <div class="card">
-    <p class="note">Mutter counter — goal 20 reps, soft bed loop underneath</p>
-    <div class="counter"><div class="n">14<span style="font-size:16px; color:var(--sky)">/20</span></div><div class="bar"><i></i></div></div>
-  </div>
-  <div class="card">
-    <p class="note">Celebration sheet — rank-up vs warm message</p>
-    <div class="celebrate"><div class="t">Promoted: Sergeant!</div><p>Your armies grow. Roar louder next time!</p></div>
-  </div>
+<h2 class="sec" id="onboarding"><span class="eyebrow">FLOW 1</span><br>Onboarding</h2>
+<p class="lead">Choosing who you are doubles as sign-up. A parent adds each child with the smallest amount of information possible.</p>
+<div class="phones">
+  <div class="phone"><div class="grow"><h3>Who are you?</h3><div class="sub">First screen. Determines the whole path.</div><a class="btn btn-red">I'm a parent</a><a class="btn btn-ghost">I'm meditating for myself</a></div><div class="sub">Who's here today? · Children are always added by a parent.</div></div>
+  <div class="phone"><div class="grow"><h3>Create your account</h3><div class="sub">Minimal fields. No child data collected here.</div><input value="" placeholder="Email"><input value="" placeholder="Password" type="password"><a class="btn btn-red">Continue</a></div><div class="sub">No ads. No messaging. You can delete everything at any time.</div></div>
+  <div class="phone"><div class="grow"><h3>Add your child</h3><div class="sub">We only ever ask for this much.</div><input value="" placeholder="First name or nickname"><div class="sub" style="margin:8px 0 2px">Age group</div><div class="seg"><span>4–7</span><span class="on">8–11</span><span>12–17</span></div><a class="btn btn-red">Add child</a></div><div class="sub">Only a name and an age group. Nothing else.</div></div>
+  <div class="phone"><div class="grow"><div style="text-align:center; margin:16px 0"><span class="rank-badge">RECRUIT</span></div><h3 style="text-align:center">This is your Soldier</h3><div class="sub" style="text-align:center">He grows every time you meditate. Let's begin.</div><a class="btn btn-gold">Let's go</a></div><div class="sub">Warm welcome at Recruit rank.</div></div>
+</div>
 
-  <h2>5 · The Soldier <span>Recruit → Private → Sergeant → Captain</span></h2>
-  <p class="note">Companion and face of the brand, including the app icon. Chevrons = rank; armies gather as he rises. Adventurous and joyful, never violent.</p>
-  <div class="soldiers">
-    <div class="soldier"><div class="avatar playful"><svg width="44" height="44" viewBox="0 0 24 24"><path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5l8-3z" fill="#F7F3EA"/></svg><span class="chev">RECRUIT</span></div><b>Recruit</b><br><small style="color:var(--sky)">starting rank</small></div>
-    <div class="soldier"><div class="avatar playful"><svg width="44" height="44" viewBox="0 0 24 24"><path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5l8-3z" fill="#F7F3EA"/><path d="M7 12l2 2 4-4" stroke="#C81E3A" stroke-width="2" fill="none"/></svg><span class="chev">★ PRIVATE</span></div><b>Private</b><br><small style="color:var(--sky)">1 scripture</small></div>
-    <div class="soldier"><div class="avatar playful"><svg width="44" height="44" viewBox="0 0 24 24"><path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5l8-3z" fill="#F5B301"/></svg><span class="chev">★★ SERGEANT</span></div><b>Sergeant</b><br><small style="color:var(--sky)">2 scriptures</small></div>
-    <div class="soldier"><div class="avatar heroic"><svg width="44" height="44" viewBox="0 0 24 24"><path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5l8-3z" fill="#F5B301"/><path d="M12 6v9M8 9l4-3 4 3" stroke="#101828" stroke-width="1.6" fill="none"/></svg><span class="chev">★★★ CAPTAIN</span></div><b>Captain</b><br><small style="color:var(--sky)">3 scriptures · heroic trim</small></div>
-  </div>
+<h2 class="sec" id="steps"><span class="eyebrow">FLOW 2 · CORE</span><br>Home and the three steps</h2>
+<p class="lead">The palette narrows as focus deepens. Home is calm and ready. Ponder strips to near-monochrome stillness. Mutter holds a steady, repeated rhythm. <b>Roar is the only screen allowed to go fully loud.</b></p>
+<div class="phones">
+  <div class="phone"><div class="grow"><span class="rank-badge">SERGEANT · 3 in his army</span><h3 style="margin-top:12px">Today</h3><div class="scripture">Be strong and courageous</div><a class="btn btn-red">Start</a><a class="btn btn-ghost">Browse themes ›</a></div><div class="sub">Home — Soldier, today's scripture, browse themes.</div></div>
+  <div class="phone parchment"><div class="grow"><h3 class="serif">Ponder</h3><div class="sub">Read, question, imagine. No timer.</div><div class="scripture">"Be strong and courageous. Do not be afraid."</div><div class="q">Where are you in this scene?</div><a class="btn btn-red">I'm done</a></div><div class="sub">Home · My journey</div></div>
+  <div class="phone"><div class="grow"><h3>Mutter</h3><div class="sub">Phrase by phrase, 20 times. Counter, soft sound. · Soft sound on</div><div class="scripture">"…do not be afraid…"</div><div class="dots"><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="sub">7 of 20 — the row itself shows the journey, never a number alone.</div></div><div class="sub">Home · My journey</div></div>
+  <div class="phone roar"><div class="grow"><div class="sub">ROAR · LOUD, BOLD, JOYFUL</div><div class="roar-word">"I will fear <mark>no evil</mark>, for You are <mark>with me!</mark>"</div><a class="btn btn-gold">Declare it</a></div><div class="sub">Words light up.</div></div>
+  <div class="phone"><div class="grow" style="text-align:center"><div class="sub">RANK-UP CELEBRATION · only on promotion</div><div class="serif" style="font-size:32px; font-weight:900; color:var(--gold)">PROMOTED<br>Captain!</div><p style="margin:10px 0">4 soldiers now stand with you</p><a class="btn btn-gold">Continue</a></div></div>
+  <div class="phone"><div class="grow" style="text-align:center"><div class="sub">COMPLETION · ordinary days</div><h3 class="serif">Well done today</h3><p>You earned <b style="color:var(--gold)">3 jewels</b>.<br>Your Soldier is proud of you.</p><a class="btn btn-red">See you tomorrow</a></div></div>
+</div>
 
-  <h2>6 · Age-group wording <span>same screen, three voices</span></h2>
-  <div class="ages">
-    <div class="age"><b class="band">Ages 4–7</b> · playful Soldier<small class="tt"></small><p class="copy big">Let's picture it! Where are you?</p><p class="note" style="margin:8px 0 0">Everything read aloud.</p></div>
-    <div class="age"><b class="band">Ages 8–11</b> · friendly Soldier<p class="copy">Close your eyes. What do you see, hear, and feel in this verse?</p><p class="note" style="margin:8px 0 0">Read + listen offered.</p></div>
-    <div class="age"><b class="band">Ages 12–17</b> · heroic Soldier<p class="copy">Place yourself inside the scene. How does this truth reframe what you're facing today?</p><p class="note" style="margin:8px 0 0">Grown-up wording, non-cartoon.</p></div>
-  </div>
+<h2 class="sec" id="journey"><span class="eyebrow">FLOW 3</span><br>My Journey</h2>
+<p class="lead">One button off the home screen holds everything else, so home stays uncluttered: the treasure chest, streak, badges, and the jewel shop for Soldier extras.</p>
+<div class="phones">
+  <div class="phone"><div class="grow"><h3>My journey</h3><div class="jewel-row"><div class="jewel-stat"><div class="v">37</div><div class="l">jewels</div></div><div class="jewel-stat"><div class="v" style="color:#7fd6ae">5</div><div class="l">day streak</div></div></div><div class="sub">Badges</div><div class="dots"><i class="f"></i><i class="f"></i><i class="f"></i><i></i><i></i><i></i></div><div class="sub" style="margin-top:10px">Treasure chest — fills as new scriptures are completed.</div><div class="scripture" style="font-size:14px">37 jewels — spend them on your Soldier</div><a class="btn btn-gold">Open the shop</a></div><div class="sub">Home · My journey</div></div>
+  <div class="phone"><div class="grow"><h3>Soldier shop</h3><div class="sub">Jewels buy extras — uniform, banner, armor.</div><div class="shop-item"><div class="art"></div><div>Banner</div><div class="p">◆ 12</div></div><div class="shop-item"><div class="art"></div><div>Armor plate</div><div class="p">◆ 20</div></div><div class="shop-item"><div class="art"></div><div>Field cloak</div><div class="p">◆ 15</div></div></div><div class="sub">Home · My journey</div></div>
+</div>
 
-  <h2>7 · Step screens <span>calm → steady → bold</span></h2>
-  <div class="phones">
-    <div class="phone calm"><small class="tt">PONDER · CALM</small><h3>Picture yourself in it</h3><div class="verse">"God has not given us a spirit of fear, but of power, love and a sound mind."</div><div class="q">Where are you in this scene?</div><div class="q" style="opacity:.5">What do you see, hear, feel? (next)</div><p class="note">Draw or write → saved → "I'm done", no timer.</p></div>
-    <div class="phone calm"><small class="tt">MUTTER · STEADY</small><h3>Say it softly, again</h3><div class="verse">…but of <b>power</b>, love and a sound mind.</div><div class="counter"><div class="n">14<span style="font-size:14px; color:var(--sky)">/20</span></div><div class="bar"><i></i></div></div><p class="note" style="margin-top:12px">Phrase-by-phrase · soft bed loop · no mic, nothing recorded.</p></div>
-    <div class="phone roar"><small class="tt">ROAR · BOLD</small><h3>Declare it LOUD!</h3><div class="verse"><span class="lit">God has NOT</span> given us a spirit of fear, <span class="lit">but POWER!</span></div><p class="note" style="color:#fff">Words light up · uplifting music · boldest moment in the app.</p></div>
-  </div>
+<h2 class="sec" id="parent"><span class="eyebrow">FLOW 4</span><br>Parent area</h2>
+<p class="lead">Protected by a simple PIN so a child cannot wander in. Lighter, calmer surface than the child's world — this is an adult reading a dashboard, not a celebration space.</p>
+<div class="phones">
+  <div class="phone"><div class="grow"><h3>Enter parent PIN</h3><div class="sub">Simple, not punitive.</div><div class="seg"><span>1</span><span>2</span><span>3</span></div><div class="seg"><span>4</span><span>5</span><span>6</span></div><div class="seg"><span>7</span><span>8</span><span>9</span></div></div></div>
+  <div class="phone"><div class="grow"><h3>Amara's progress</h3><div class="sub">5 day streak · 12 min this week</div><div class="prog-row">Be strong and courageous <span class="tag">ROAR</span></div><div class="prog-row">The Lord is my shepherd <span class="tag">MUTTER</span></div><div class="prog-row">I can do all things <span class="tag">PONDER</span></div></div><div class="sub">Streak, scriptures, step reached, time spent.</div></div>
+  <div class="phone"><div class="grow"><h3>This week's focus</h3><div class="sub">Parent and child choose a theme together.</div><div><span class="focus-opt on">Courage</span><span class="focus-opt">Sound mind</span><span class="focus-opt">Trusting God</span><span class="focus-opt">Peace</span></div></div></div>
+  <div class="phone"><div class="grow"><h3>The full library</h3><div class="sub">Amara finished Sound Mind. Unlock every theme for the whole family — up to 5 children.</div><div class="price">$7.99/mo</div><a class="btn btn-red">Subscribe</a></div><div class="sub">Subscription · parent-only. A child never sees a price.</div></div>
+</div>
 
-  <footer>Tokens: <code class="inline">design/tokens.json</code> · This page: <code class="inline">design/showcase.html</code> · V1 scope: Sound Mind × 3 scriptures · Store name: iMeditate</footer>
+<h2 class="sec" id="components"><span class="eyebrow">FOUNDATION</span><br>Components</h2>
+<p class="lead">The recurring pieces used to build every screen above.</p>
+<div class="type-card"><small>BUTTONS</small><p style="color:var(--dusk); font-size:13px; margin:6px 0 12px">Red for primary progression. Gold only for Roar and reward moments. Ghost for secondary, low-emphasis actions.</p><div style="display:flex; gap:10px; flex-wrap:wrap"><a class="btn btn-red" style="margin:0">Continue</a><a class="btn btn-gold" style="margin:0">Declare it</a><a class="btn btn-ghost" style="margin:0">Not now</a></div></div>
+<div class="type-card"><small>PROGRESS DOTS — MUTTER</small><p style="color:var(--dusk); font-size:13px; margin:6px 0">Filled dot = one repetition said. Never a numeric-only counter — the row itself shows the whole journey to 20.</p><div class="dots"><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+<div class="type-card"><small>RANK BADGE · STREAK CHIP</small><div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:8px"><span class="rank-badge">CAPTAIN · 4 soldiers</span><span class="streak-chip">5 day streak</span></div></div>
+<div class="type-card"><small>FOCUS WARNING</small><div class="warn"><b>Your Soldier is waiting</b><p>Come back in the next minute to keep your place.</p></div></div>
+
+<h2 class="sec" id="principles"><span class="eyebrow">FOUNDATION</span><br>Principles</h2>
+<div class="principles">
+  <div class="pr"><div class="n">01</div><h3>Earned colour stays earned</h3><p>Gold and the Soldier's insignia appear only at real achievement — never as default chrome — or the reward stops meaning anything.</p></div>
+  <div class="pr"><div class="n">02</div><h3>The palette narrows as focus deepens</h3><p>Home is navy and gold. Ponder strips to near-monochrome parchment for stillness. Roar is the only screen allowed to go loud.</p></div>
+  <div class="pr"><div class="n">03</div><h3>The Soldier is illustrated, not iconographic</h3><p>He is a character, not a logo — so he carries the age shift from playful to heroic through art alone, while the UI stays age-agnostic.</p></div>
+  <div class="pr"><div class="n">04</div><h3>Scripture text is never decorated</h3><p>No colour washes, no fancy framing. It is the one visual constant a 5-year-old and a 17-year-old both read the same way.</p></div>
+</div>
+
+<footer>iMeditate design system · reference document · Tokens: <code>design/tokens.json</code> · This page: <code>design/showcase.html</code></footer>
 </div>
 </body>
 </html>
