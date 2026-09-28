@@ -17,13 +17,17 @@ const AGE_GROUPS = ["4-7", "8-11", "12-17"];
 const app = new Hono();
 
 // --- auth (Better Auth) ---
-app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
+// NOTE: specific /api/auth/* routes below must stay BEFORE the wildcard.
+// --- email verification (code step after signup; welcome after) ---
 
 // --- helpers ---
 async function parentOf(c) {
   const session = await auth.api.getSession({ headers: c.req.raw.headers });
   if (!session?.user) return null;
-  const { rows } = await pool.query("SELECT id, email FROM parents WHERE auth_user_id = $1", [session.user.id]);
+  const { rows } = await pool.query(
+    'SELECT p.id, p.email, u."emailVerified" AS verified FROM parents p JOIN "user" u ON u.id = p.auth_user_id WHERE p.auth_user_id = $1',
+    [session.user.id]
+  );
   return rows[0] ?? null;
 }
 async function requireParent(c) {
@@ -53,9 +57,53 @@ app.get("/api/me", async (c) => {
   return c.json(p);
 });
 
+// --- email verification (code step after signup; welcome after) ---
+function makeCode() {
+  return String(Math.floor(100000 + Math.random() * 900000));
+}
+app.post("/api/auth/request-code", async (c) => {
+  const { email } = await c.req.json();
+  const clean = String(email ?? "").trim().toLowerCase();
+  if (!clean.includes("@")) return c.json({ error: "valid email required" }, 400);
+  const exists = await pool.query('SELECT id FROM "user" WHERE email = $1', [clean]);
+  if (!exists.rows[0]) return c.json({ error: "no account for this email" }, 404);
+  const code = makeCode();
+  await pool.query(
+    `INSERT INTO email_codes (email, code, expires_at, attempts) VALUES ($1,$2,now() + interval '15 minutes',0)
+     ON CONFLICT (email) DO UPDATE SET code=$2, expires_at=now() + interval '15 minutes', attempts=0`,
+    [clean, code]
+  );
+  console.log(`verify code for ${clean}: ${code} (dev log; production sends email)`);
+  const out = { ok: true };
+  if (process.env.ALLOW_DEV_CODES === "true") out.devCode = code;
+  return c.json(out);
+});
+app.post("/api/auth/verify-code", async (c) => {
+  const { email, code } = await c.req.json();
+  const clean = String(email ?? "").trim().toLowerCase();
+  const { rows } = await pool.query("SELECT code, expires_at, attempts FROM email_codes WHERE email = $1", [clean]);
+  const row = rows[0];
+  if (!row || row.attempts >= 5) return c.json({ error: "code invalid" }, 400);
+  await pool.query("UPDATE email_codes SET attempts = attempts + 1 WHERE email = $1", [clean]);
+  if (row.code !== String(code ?? "") || new Date(row.expires_at) < new Date()) {
+    return c.json({ error: "code invalid or expired" }, 400);
+  }
+  await pool.query('UPDATE "user" SET "emailVerified" = true WHERE email = $1', [clean]);
+  await pool.query("DELETE FROM email_codes WHERE email = $1", [clean]);
+  return c.json({ ok: true });
+});
+async function requireVerified(c) {
+  const p = await requireParent(c);
+  if (p instanceof Response) return p;
+  if (!p.verified) return c.json({ error: "verify email first" }, 403);
+  return p;
+}
+
+app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
+
 // --- parent PIN ---
 app.post("/api/parent/pin", async (c) => {
-  const p = await requireParent(c);
+  const p = await requireVerified(c);
   if (p instanceof Response) return p;
   const { pin } = await c.req.json();
   if (!/^\d{4,6}$/.test(pin ?? "")) return c.json({ error: "pin must be 4-6 digits" }, 400);
@@ -79,7 +127,7 @@ app.delete("/api/parent", async (c) => {
 
 // --- children ---
 app.post("/api/children", async (c) => {
-  const p = await requireParent(c);
+  const p = await requireVerified(c);
   if (p instanceof Response) return p;
   const { nickname, age_group } = await c.req.json();
   if (!nickname || nickname.length > 40) return c.json({ error: "nickname required, max 40" }, 400);
@@ -94,13 +142,13 @@ app.post("/api/children", async (c) => {
   return c.json(child, 201);
 });
 app.get("/api/children", async (c) => {
-  const p = await requireParent(c);
+  const p = await requireVerified(c);
   if (p instanceof Response) return p;
   const { rows } = await pool.query("SELECT id, nickname, age_group, soldier_rank FROM children WHERE parent_id = $1", [p.id]);
   return c.json(rows);
 });
 app.delete("/api/children/:id", async (c) => {
-  const p = await requireParent(c);
+  const p = await requireVerified(c);
   if (p instanceof Response) return p;
   const child = await ownChild(p.id, c.req.param("id"));
   if (!child) return c.json({ error: "not found" }, 404);
@@ -120,7 +168,7 @@ app.get("/api/themes/:id/scriptures", async (c) => {
 
 // --- progress ---
 app.get("/api/progress/:childId", async (c) => {
-  const p = await requireParent(c);
+  const p = await requireVerified(c);
   if (p instanceof Response) return p;
   const child = await ownChild(p.id, c.req.param("childId"));
   if (!child) return c.json({ error: "not found" }, 404);
@@ -128,7 +176,7 @@ app.get("/api/progress/:childId", async (c) => {
   return c.json(rows);
 });
 app.put("/api/progress/:childId/:scriptureId", async (c) => {
-  const p = await requireParent(c);
+  const p = await requireVerified(c);
   if (p instanceof Response) return p;
   const child = await ownChild(p.id, c.req.param("childId"));
   if (!child) return c.json({ error: "not found" }, 404);
@@ -159,7 +207,7 @@ app.put("/api/progress/:childId/:scriptureId", async (c) => {
 
 // --- artifacts (Ponder drawings/writings; local disk now, R2 presigned next slice) ---
 app.post("/api/artifacts", async (c) => {
-  const p = await requireParent(c);
+  const p = await requireVerified(c);
   if (p instanceof Response) return p;
   const { child_id, scripture_id, png_base64 } = await c.req.json();
   const child = await ownChild(p.id, child_id);
@@ -199,7 +247,7 @@ app.get("/api/storage", async (c) => c.json({ mode: r2Configured ? "r2" : "local
 
 // --- R2 direct upload: ticket -> app PUTs bytes -> confirm writes DB rows ---
 app.post("/api/artifacts/request", async (c) => {
-  const p = await requireParent(c);
+  const p = await requireVerified(c);
   if (p instanceof Response) return p;
   if (!r2Configured) return c.json({ error: "r2 not configured" }, 501);
   const { child_id, kind = "ponder", ext = "png", content_type = "image/png" } = await c.req.json();
@@ -210,7 +258,7 @@ app.post("/api/artifacts/request", async (c) => {
   return c.json({ ...ticket, viewUrl: null }, 201);
 });
 app.post("/api/artifacts/confirm", async (c) => {
-  const p = await requireParent(c);
+  const p = await requireVerified(c);
   if (p instanceof Response) return p;
   if (!r2Configured) return c.json({ error: "r2 not configured" }, 501);
   const { child_id, scripture_id, bucket, key } = await c.req.json();
@@ -226,7 +274,7 @@ app.post("/api/artifacts/confirm", async (c) => {
   return c.json({ url, viewUrl: await presignedGet(key) }, 201);
 });
 app.get("/api/wallet/:childId", async (c) => {
-  const p = await requireParent(c);
+  const p = await requireVerified(c);
   if (p instanceof Response) return p;
   const child = await ownChild(p.id, c.req.param("childId"));
   if (!child) return c.json({ error: "not found" }, 404);
