@@ -42,12 +42,14 @@ services:
     image: node:22-alpine
     container_name: imeditate-app
     working_dir: /app
-    user: "501:20"
     environment:
       NPM_CONFIG_CACHE: /tmp/.npm
+      NPM_CONFIG_FETCH_RETRIES: "5"
+      NPM_CONFIG_FETCH_RETRY_MINTIMEOUT: "20000"
       HOME: /tmp
       EXPO_NO_TELEMETRY: "1"
       EXPO_DEVTOOLS_LISTEN_ADDRESS: 0.0.0.0
+      REACT_NATIVE_PACKAGER_HOSTNAME: 192.168.34.214
       EXPO_PUBLIC_API_URL: http://192.168.34.214:3000
     volumes:
       - ./app:/app
@@ -55,7 +57,7 @@ services:
       - app_expo:/app/.expo
     ports:
       - "8081:8081"
-    command: sh -c "npx expo start --tunnel"
+    command: sh -c "npm install --no-audit --no-fund --package-lock=false && npm install -g @expo/ngrok@^4.1.0 && npx expo start --lan --non-interactive"
     profiles: ["app"]
 
 volumes:
