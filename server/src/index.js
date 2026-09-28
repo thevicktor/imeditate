@@ -48,14 +48,14 @@ async function checkPin(pin, stored) {
 app.get("/health", (c) => c.json({ ok: true }));
 app.get("/api/me", async (c) => {
   const p = await requireParent(c);
-  if (p?.error) return p;
+  if (p instanceof Response) return p;
   return c.json(p);
 });
 
 // --- parent PIN ---
 app.post("/api/parent/pin", async (c) => {
   const p = await requireParent(c);
-  if (p?.error) return p;
+  if (p instanceof Response) return p;
   const { pin } = await c.req.json();
   if (!/^\d{4,6}$/.test(pin ?? "")) return c.json({ error: "pin must be 4-6 digits" }, 400);
   await pool.query("UPDATE parents SET pin_hash = $1 WHERE id = $2", [await hashPin(pin), p.id]);
@@ -63,7 +63,7 @@ app.post("/api/parent/pin", async (c) => {
 });
 app.post("/api/parent/unlock", async (c) => {
   const p = await requireParent(c);
-  if (p?.error) return p;
+  if (p instanceof Response) return p;
   const { pin } = await c.req.json();
   const { rows } = await pool.query("SELECT pin_hash FROM parents WHERE id = $1", [p.id]);
   if (!rows[0]?.pin_hash) return c.json({ error: "no pin set" }, 400);
@@ -71,7 +71,7 @@ app.post("/api/parent/unlock", async (c) => {
 });
 app.delete("/api/parent", async (c) => {
   const p = await requireParent(c);
-  if (p?.error) return p;
+  if (p instanceof Response) return p;
   await pool.query("DELETE FROM parents WHERE id = $1", [p.id]);
   return c.json({ ok: true });
 });
@@ -79,7 +79,7 @@ app.delete("/api/parent", async (c) => {
 // --- children ---
 app.post("/api/children", async (c) => {
   const p = await requireParent(c);
-  if (p?.error) return p;
+  if (p instanceof Response) return p;
   const { nickname, age_group } = await c.req.json();
   if (!nickname || nickname.length > 40) return c.json({ error: "nickname required, max 40" }, 400);
   if (!AGE_GROUPS.includes(age_group)) return c.json({ error: "age_group must be 4-7, 8-11 or 12-17" }, 400);
@@ -94,13 +94,13 @@ app.post("/api/children", async (c) => {
 });
 app.get("/api/children", async (c) => {
   const p = await requireParent(c);
-  if (p?.error) return p;
+  if (p instanceof Response) return p;
   const { rows } = await pool.query("SELECT id, nickname, age_group, soldier_rank FROM children WHERE parent_id = $1", [p.id]);
   return c.json(rows);
 });
 app.delete("/api/children/:id", async (c) => {
   const p = await requireParent(c);
-  if (p?.error) return p;
+  if (p instanceof Response) return p;
   const child = await ownChild(p.id, c.req.param("id"));
   if (!child) return c.json({ error: "not found" }, 404);
   await pool.query("DELETE FROM children WHERE id = $1", [child.id]);
@@ -120,7 +120,7 @@ app.get("/api/themes/:id/scriptures", async (c) => {
 // --- progress ---
 app.get("/api/progress/:childId", async (c) => {
   const p = await requireParent(c);
-  if (p?.error) return p;
+  if (p instanceof Response) return p;
   const child = await ownChild(p.id, c.req.param("childId"));
   if (!child) return c.json({ error: "not found" }, 404);
   const { rows } = await pool.query("SELECT scripture_id, stage, ponder_artifact_url, mutter_count FROM progress WHERE child_id = $1", [child.id]);
@@ -128,7 +128,7 @@ app.get("/api/progress/:childId", async (c) => {
 });
 app.put("/api/progress/:childId/:scriptureId", async (c) => {
   const p = await requireParent(c);
-  if (p?.error) return p;
+  if (p instanceof Response) return p;
   const child = await ownChild(p.id, c.req.param("childId"));
   if (!child) return c.json({ error: "not found" }, 404);
   const { stage, mutter_count } = await c.req.json();
@@ -159,7 +159,7 @@ app.put("/api/progress/:childId/:scriptureId", async (c) => {
 // --- artifacts (Ponder drawings/writings; local disk now, R2 presigned next slice) ---
 app.post("/api/artifacts", async (c) => {
   const p = await requireParent(c);
-  if (p?.error) return p;
+  if (p instanceof Response) return p;
   const { child_id, scripture_id, png_base64 } = await c.req.json();
   const child = await ownChild(p.id, child_id);
   if (!child) return c.json({ error: "not found" }, 404);
@@ -195,7 +195,7 @@ app.get("/preview", async (c) => {
 });
 app.get("/api/wallet/:childId", async (c) => {
   const p = await requireParent(c);
-  if (p?.error) return p;
+  if (p instanceof Response) return p;
   const child = await ownChild(p.id, c.req.param("childId"));
   if (!child) return c.json({ error: "not found" }, 404);
   const { rows } = await pool.query("SELECT balance FROM jewel_wallets WHERE child_id = $1", [child.id]);
