@@ -318,6 +318,8 @@ Layout, colour, and interaction never change by age.
 
 ## **16\.4\. Flows**
 
+**Welcome (Flow 0, before sign-up).** Soldier emblem in a gold-ringed circle, **iMeditate**, tagline **Meditate. Prosper. Succeed.** (gold, from Joshua 1:8), one-line description, amber **Get started**, quiet "I already have an account" link. Then a Three-steps preview (badges: parchment, dusk blue, red — red's only appearance), then Made-for-families promises with growth-green checks and a second **Get started**, leading into onboarding.
+
 **Onboarding.** Choosing who you are doubles as sign-up: "I'm a parent" or "I'm meditating for myself." Parent sign-up uses Email + Password with minimal fields and no child data. A child is added with only a first name or nickname and an age group. The child then meets their Soldier at Recruit rank.
 
 **Home and the three steps.** Home shows three things only: Soldier, today's scripture, browse themes. The palette narrows as focus deepens: Home is navy and gold, Ponder strips to near-monochrome parchment stillness with no timer, Mutter holds a steady phrase-by-phrase rhythm with progress dots to 20 and soft sound, and Roar is the only screen allowed to go fully loud, with words lighting up and a Declare button. A rank-up celebration appears only on promotion; ordinary days close warmly.
