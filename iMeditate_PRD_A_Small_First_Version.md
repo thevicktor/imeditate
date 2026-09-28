@@ -49,15 +49,15 @@ This document describes Version 1, the smallest version worth putting in front o
 
 **Parents and guardians.** They create the account, add the child, and stay in charge of the device experience.
 
-**Any adult.** An adult can sign up and meditate for themselves. Their personal area is limited in Version 1 (see Section 9).
+**Any adult.** In Version 1 every account is a parent account. Meditating for oneself without adding a child waits for a later version.
 
 # **4\. What Is In and What Is Out**
 
 ## **Included in Version 1**
 
-* Adult sign-up, with a parent adding one child profile.
+* Adult sign-up (parent only in Version 1), email verification, with a parent adding up to five child profiles.
 
-* Child profile with a first name or nickname, an age group, and a Soldier.
+* Child profiles with a first name or nickname, an age group, and a Soldier. A parent chooses how many children (up to five) and adds each one in turn.
 
 * One free theme, Sound Mind, with 3 scriptures.
 
@@ -83,19 +83,21 @@ This document describes Version 1, the smallest version worth putting in front o
 
 * More than one theme, and the ranks beyond the first few.
 
-* Multiple children and the parent's own personal plan.
+* Multiple children beyond five and the parent's own personal plan.
 
 *Each of these appears in the full plan (see the companion document). They wait so that Version 1 stays focused.*
 
 # **5\. The First-Time Journey**
 
-1. **Open and choose who you are.** An adult opens iMeditate and chooses that they are a parent, which starts their sign-up.
+1. **Open and sign up as a parent.** Version 1 is parent-led: the adult creates an account with Email + Password. Meditating for oneself without a child waits for a later version.
 
-2. **Create the account.** The parent creates their account with the smallest amount of information needed.
+2. **Verify the email.** A 6-digit code confirms the inbox (15 minutes). Nothing else unlocks until this is done.
 
-3. **Add the child.** The parent adds one child using only a first name or nickname and an age group. No photo, location, or school details are ever asked for.
+3. **Welcome and PIN.** A welcome message explains what happens next, and the parent sets the PIN that guards the parent area.
 
-4. **Meet the Soldier.** The child meets their Soldier at his first rank and sees a short, friendly introduction to the three steps.
+4. **Add the children.** The parent chooses how many children (up to five) and adds each with only a first name or nickname and an age group. No photo, location, or school details are ever asked for.
+
+4. **Meet the Soldier.** Each child meets their own Soldier at his first rank and sees a short, friendly introduction to the three steps.
 
 5. **Arrive at home.** The home screen shows the Soldier, today's suggested scripture with a big Start button, and a way to browse the theme.
 
@@ -182,7 +184,7 @@ Later ranks (General, the stars, and ruling cities, continents, and regions) are
 
 # **9\. The Parent's Role in Version 1**
 
-* Creates the account and adds the child.
+* Creates the account, verifies the email, and adds up to five children.
 
 * Sees a simple confirmation that the child is set up.
 
@@ -320,7 +322,7 @@ Layout, colour, and interaction never change by age.
 
 **Welcome (Flow 0, before sign-up).** Soldier emblem in a gold-ringed circle, **iMeditate**, tagline **Meditate. Prosper. Succeed.** (gold, from Joshua 1:8), one-line description, amber **Get started**, quiet "I already have an account" link. Then a Three-steps preview (badges: parchment, dusk blue, red — red's only appearance), then Made-for-families promises with growth-green checks and a second **Get started**, leading into onboarding. Welcome measurements (preview frame 220×453, scale proportionally; body ≥14pt and taps ≥44pt on real phones): side padding 18, emblem 70×70, name 26, tagline 12.5, description 12 at 1.65 line height, full-width button with 10 radius, gaps 34/16/6/20/22/16 top to bottom.
 
-**Onboarding.** Choosing who you are doubles as sign-up: "I'm a parent" or "I'm meditating for myself." Parent sign-up uses Email + Password with minimal fields and no child data. A child is added with only a first name or nickname and an age group. The child then meets their Soldier at Recruit rank.
+**Onboarding.** Parent sign-up uses Email + Password with minimal fields and no child data, followed by a 6-digit email verification and a welcome message. The parent sets the parent-area PIN, chooses how many children (up to five), and adds each with only a first name or nickname and an age group. Each child then meets their own Soldier at Recruit rank. There is no self-serve adult path in Version 1.
 
 **Home and the three steps.** Home shows three things only: Soldier, today's scripture, browse themes. The palette narrows as focus deepens: Home is navy and gold, Ponder strips to near-monochrome parchment stillness with no timer, Mutter holds a steady phrase-by-phrase rhythm with progress dots to 20 and soft sound, and Roar is the only screen allowed to go fully loud, with words lighting up and a Declare button. A rank-up celebration appears only on promotion; ordinary days close warmly.
 
