@@ -12,6 +12,7 @@ import { api, signIn, signUp } from "./src/api";
 import { AGE_GROUPS, C, Child, Scripture, Stage } from "./src/theme";
 
 type Screen =
+  | "landing"
   | "who"
   | "signup"
   | "addchild"
@@ -22,7 +23,7 @@ type Screen =
 const ORDER: Stage[] = ["ponder", "mutter", "roar", "done"];
 
 export default function App() {
-  const [screen, setScreen] = useState<Screen>("who");
+  const [screen, setScreen] = useState<Screen>("landing");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -122,6 +123,19 @@ export default function App() {
       <ScrollView contentContainerStyle={s.body}>
         <Text style={s.brand}>iMeditate</Text>
         {!!error && <Text style={s.error}>{error}</Text>}
+
+        {screen === "landing" && (
+          <View style={s.landing}>
+            <View style={s.logo}>
+              <Text style={s.logoShield}>✦</Text>
+              <Text style={s.logoIM}>iM</Text>
+            </View>
+            <Text style={s.landingName}>iMeditate</Text>
+            <Text style={s.tagline}>"Let your progress appear to all"</Text>
+            <Text style={s.hint}>Ponder · Mutter · Roar</Text>
+            <Btn title="Begin" onPress={() => setScreen("who")} />
+          </View>
+        )}
 
         {screen === "who" && (
           <>
@@ -288,4 +302,10 @@ const s = StyleSheet.create({
   banner: { backgroundColor: C.input, borderWidth: 1, borderColor: C.line, borderRadius: 16, padding: 20, alignItems: "center", marginTop: 10 },
   bannerPromo: { backgroundColor: C.red, borderColor: C.gold, borderWidth: 2 },
   bannerBig: { color: "#fff", fontSize: 26, fontWeight: "900", textAlign: "center" },
+  landing: { alignItems: "center", paddingTop: 72 },
+  logo: { width: 112, height: 112, borderRadius: 28, backgroundColor: C.red, borderWidth: 3, borderColor: C.gold, alignItems: "center", justifyContent: "center", marginBottom: 20 },
+  logoShield: { color: C.gold, fontSize: 20, marginBottom: -6 },
+  logoIM: { color: "#fff", fontSize: 44, fontWeight: "900", fontFamily: "Georgia" },
+  landingName: { color: C.parchment, fontSize: 34, fontWeight: "900", fontFamily: "Georgia" },
+  tagline: { color: C.gold, fontSize: 16, fontStyle: "italic", fontFamily: "Georgia", textAlign: "center", marginTop: 10, marginBottom: 4 },
 });
