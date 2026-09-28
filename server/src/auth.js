@@ -1,4 +1,5 @@
 import { betterAuth } from "better-auth";
+import { bearer } from "better-auth/plugins";
 import { Pool } from "pg";
 
 export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -7,6 +8,7 @@ export const auth = betterAuth({
   database: pool,
   baseURL: process.env.BETTER_AUTH_URL ?? "http://localhost:3000",
   emailAndPassword: { enabled: true, minPasswordLength: 8 },
+  plugins: [bearer()], // mobile: Authorization: Bearer <session-token>
   databaseHooks: {
     user: {
       create: {
