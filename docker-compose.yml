@@ -52,6 +52,7 @@ services:
       EXPO_NO_TELEMETRY: "1"
       EXPO_DEVTOOLS_LISTEN_ADDRESS: 0.0.0.0
       REACT_NATIVE_PACKAGER_HOSTNAME: 192.168.34.214
+      EXPO_TOKEN: ${EXPO_TOKEN:-}
       EXPO_PUBLIC_API_URL: http://192.168.34.214:3000
     volumes:
       - ./app:/app
