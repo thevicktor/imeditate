@@ -60,7 +60,7 @@ services:
       - app_expo:/app/.expo
     ports:
       - "8081:8081"
-    command: sh -c "npm install --no-audit --no-fund --package-lock=false && npm install -g @expo/ngrok@^4.1.0 && npx expo start --lan --non-interactive"
+    command: sh -c "npm install --no-audit --no-fund --package-lock=false && npm install -g @expo/ngrok@^4.1.0 && npx expo start --lan -c"
     profiles: ["app"]
 
 volumes:
