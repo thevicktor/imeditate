@@ -6,6 +6,7 @@ import { join, basename } from "node:path";
 import { promisify } from "node:util";
 import { auth, pool } from "./auth.js";
 import { nextStage, rankFor, promoted, JEWELS_PER_COMPLETION } from "./rules.js";
+import { r2Configured, objectKey, presignedPut, presignedGet, parseR2Url } from "./r2.js";
 
 const scryptAsync = promisify(scrypt);
 const PORT = Number(process.env.PORT ?? 3000);
@@ -192,6 +193,37 @@ app.get("/preview", async (c) => {
   } catch {
     return c.json({ error: "preview not found" }, 404);
   }
+});
+// --- storage mode (lets the app pick upload path without knowing secrets) ---
+app.get("/api/storage", async (c) => c.json({ mode: r2Configured ? "r2" : "local" }));
+
+// --- R2 direct upload: ticket -> app PUTs bytes -> confirm writes DB rows ---
+app.post("/api/artifacts/request", async (c) => {
+  const p = await requireParent(c);
+  if (p instanceof Response) return p;
+  if (!r2Configured) return c.json({ error: "r2 not configured" }, 501);
+  const { child_id, kind = "ponder", ext = "png", content_type = "image/png" } = await c.req.json();
+  const child = await ownChild(p.id, child_id);
+  if (!child) return c.json({ error: "not found" }, 404);
+  const key = objectKey(p.id, child.id, kind, ext);
+  const ticket = await presignedPut(key, content_type);
+  return c.json({ ...ticket, viewUrl: null }, 201);
+});
+app.post("/api/artifacts/confirm", async (c) => {
+  const p = await requireParent(c);
+  if (p instanceof Response) return p;
+  if (!r2Configured) return c.json({ error: "r2 not configured" }, 501);
+  const { child_id, scripture_id, bucket, key } = await c.req.json();
+  const child = await ownChild(p.id, child_id);
+  if (!child) return c.json({ error: "not found" }, 404);
+  const url = `r2://${bucket}/${key}`;
+  await pool.query("INSERT INTO artifacts (child_id, scripture_id, png_url) VALUES ($1,$2,$3)", [child.id, scripture_id, url]);
+  await pool.query(
+    `INSERT INTO progress (child_id, scripture_id, ponder_artifact_url) VALUES ($1,$2,$3)
+     ON CONFLICT (child_id, scripture_id) DO UPDATE SET ponder_artifact_url = $3`,
+    [child.id, scripture_id, url]
+  );
+  return c.json({ url, viewUrl: await presignedGet(key) }, 201);
 });
 app.get("/api/wallet/:childId", async (c) => {
   const p = await requireParent(c);
