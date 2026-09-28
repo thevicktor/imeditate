@@ -1,6 +1,7 @@
 export const C = {
   navy: "#0F1E3D",
   navy2: "#16294f",
+  emblem: "#16264A",
   line: "#2c4478",
   input: "#0b1730",
   red: "#B3202A",
