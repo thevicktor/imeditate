@@ -318,7 +318,7 @@ Layout, colour, and interaction never change by age.
 
 ## **16\.4\. Flows**
 
-**Welcome (Flow 0, before sign-up).** Soldier emblem in a gold-ringed circle, **iMeditate**, tagline **Meditate. Prosper. Succeed.** (gold, from Joshua 1:8), one-line description, amber **Get started**, quiet "I already have an account" link. Then a Three-steps preview (badges: parchment, dusk blue, red — red's only appearance), then Made-for-families promises with growth-green checks and a second **Get started**, leading into onboarding.
+**Welcome (Flow 0, before sign-up).** Soldier emblem in a gold-ringed circle, **iMeditate**, tagline **Meditate. Prosper. Succeed.** (gold, from Joshua 1:8), one-line description, amber **Get started**, quiet "I already have an account" link. Then a Three-steps preview (badges: parchment, dusk blue, red — red's only appearance), then Made-for-families promises with growth-green checks and a second **Get started**, leading into onboarding. Welcome measurements (preview frame 220×453, scale proportionally; body ≥14pt and taps ≥44pt on real phones): side padding 18, emblem 70×70, name 26, tagline 12.5, description 12 at 1.65 line height, full-width button with 10 radius, gaps 34/16/6/20/22/16 top to bottom.
 
 **Onboarding.** Choosing who you are doubles as sign-up: "I'm a parent" or "I'm meditating for myself." Parent sign-up uses Email + Password with minimal fields and no child data. A child is added with only a first name or nickname and an age group. The child then meets their Soldier at Recruit rank.
 
