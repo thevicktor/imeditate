@@ -12,7 +12,9 @@ import { api, signIn, signUp } from "./src/api";
 import { AGE_GROUPS, C, Child, Scripture, Stage } from "./src/theme";
 
 type Screen =
-  | "landing"
+  | "welcome"
+  | "steps"
+  | "promises"
   | "who"
   | "signup"
   | "addchild"
@@ -23,7 +25,7 @@ type Screen =
 const ORDER: Stage[] = ["ponder", "mutter", "roar", "done"];
 
 export default function App() {
-  const [screen, setScreen] = useState<Screen>("landing");
+  const [screen, setScreen] = useState<Screen>("welcome");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -124,16 +126,52 @@ export default function App() {
         <Text style={s.brand}>iMeditate</Text>
         {!!error && <Text style={s.error}>{error}</Text>}
 
-        {screen === "landing" && (
+        {screen === "welcome" && (
           <View style={s.landing}>
-            <View style={s.logo}>
-              <Text style={s.logoShield}>✦</Text>
-              <Text style={s.logoIM}>iM</Text>
+            <View style={s.emblem}>
+              <Text style={s.emblemShield}>⛨</Text>
             </View>
             <Text style={s.landingName}>iMeditate</Text>
-            <Text style={s.tagline}>"Let your progress appear to all"</Text>
-            <Text style={s.hint}>Ponder · Mutter · Roar</Text>
-            <Btn title="Begin" onPress={() => setScreen("who")} />
+            <Text style={s.tagline}>Meditate. Prosper. Succeed.</Text>
+            <Text style={s.desc}>Meditate on scripture in three steps, for children and anyone.</Text>
+            <Btn title="Get started" onPress={() => setScreen("steps")} />
+            <TouchableOpacity onPress={() => setScreen("signup")}>
+              <Text style={s.quietLink}>I already have an account</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {screen === "steps" && (
+          <View style={s.landing}>
+            <Text style={s.h1}>Three steps</Text>
+            <Text style={s.hint}>Each one leads to the next</Text>
+            <View style={s.stepRow}>
+              <View style={[s.num, { backgroundColor: C.parchment }]}><Text style={[s.numTxt, { color: C.ink }]}>1</Text></View>
+              <View style={s.stepInfo}><Text style={s.stepName}>Ponder</Text><Text style={s.hint}>See yourself in it</Text></View>
+            </View>
+            <View style={s.stepRow}>
+              <View style={[s.num, { backgroundColor: C.dusk }]}><Text style={[s.numTxt, { color: C.navy }]}>2</Text></View>
+              <View style={s.stepInfo}><Text style={s.stepName}>Mutter</Text><Text style={s.hint}>Say it quietly, again and again</Text></View>
+            </View>
+            <View style={s.stepRow}>
+              <View style={[s.num, { backgroundColor: C.red }]}><Text style={s.numTxt}>3</Text></View>
+              <View style={s.stepInfo}><Text style={s.stepName}>Roar</Text><Text style={s.hint}>Declare it with joy</Text></View>
+            </View>
+            <Btn title="Continue" onPress={() => setScreen("promises")} />
+          </View>
+        )}
+
+        {screen === "promises" && (
+          <View style={s.landing}>
+            <Text style={s.h1}>Made for families</Text>
+            <Text style={s.hint}>Safe by design</Text>
+            {["No ads, ever", "No chatting between users", "Only a first name and age group", "Delete everything at any time"].map((p) => (
+              <View key={p} style={s.promise}>
+                <Text style={s.check}>✓</Text>
+                <Text style={s.promiseTxt}>{p}</Text>
+              </View>
+            ))}
+            <Btn title="Get started" onPress={() => setScreen("who")} />
           </View>
         )}
 
@@ -303,9 +341,21 @@ const s = StyleSheet.create({
   bannerPromo: { backgroundColor: C.red, borderColor: C.gold, borderWidth: 2 },
   bannerBig: { color: "#fff", fontSize: 26, fontWeight: "900", textAlign: "center" },
   landing: { alignItems: "center", paddingTop: 72 },
+  emblem: { width: 112, height: 112, borderRadius: 56, backgroundColor: C.navy2, borderWidth: 3, borderColor: C.gold, alignItems: "center", justifyContent: "center", marginBottom: 20 },
+  emblemShield: { color: C.gold, fontSize: 52 },
   logo: { width: 112, height: 112, borderRadius: 28, backgroundColor: C.red, borderWidth: 3, borderColor: C.gold, alignItems: "center", justifyContent: "center", marginBottom: 20 },
   logoShield: { color: C.gold, fontSize: 20, marginBottom: -6 },
   logoIM: { color: "#fff", fontSize: 44, fontWeight: "900", fontFamily: "Georgia" },
   landingName: { color: C.parchment, fontSize: 34, fontWeight: "900", fontFamily: "Georgia" },
-  tagline: { color: C.gold, fontSize: 16, fontStyle: "italic", fontFamily: "Georgia", textAlign: "center", marginTop: 10, marginBottom: 4 },
+  tagline: { color: C.gold, fontSize: 17, fontWeight: "800", textAlign: "center", marginTop: 10, marginBottom: 4 },
+  desc: { color: C.dusk, fontSize: 15, textAlign: "center", marginVertical: 8, paddingHorizontal: 24 },
+  quietLink: { color: C.dusk, fontSize: 14, marginTop: 14 },
+  stepRow: { flexDirection: "row", alignItems: "center", width: "100%", marginVertical: 8 },
+  num: { width: 48, height: 48, borderRadius: 24, alignItems: "center", justifyContent: "center", marginRight: 14 },
+  numTxt: { color: "#fff", fontSize: 20, fontWeight: "900" },
+  stepInfo: { flex: 1 },
+  stepName: { color: C.parchment, fontSize: 18, fontWeight: "800" },
+  promise: { flexDirection: "row", alignItems: "center", width: "100%", marginVertical: 7 },
+  check: { color: C.green, fontSize: 20, fontWeight: "900", marginRight: 12 },
+  promiseTxt: { color: C.parchment, fontSize: 15 },
 });
