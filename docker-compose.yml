@@ -34,7 +34,6 @@ services:
     env_file:
       - ./server/.env
     environment:
-    environment:
       DATABASE_URL: postgres://${POSTGRES_USER:-imeditate}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-imeditate}
       PORT: "3000"
       MEDIA_DIR: /app/media
