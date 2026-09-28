@@ -15,8 +15,10 @@ type Screen =
   | "welcome"
   | "steps"
   | "promises"
-  | "who"
   | "signup"
+  | "verify"
+  | "hello"
+  | "howmany"
   | "addchild"
   | "soldier"
   | "home"
@@ -29,8 +31,12 @@ export default function App() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [code, setCode] = useState("");
+  const [devCode, setDevCode] = useState("");
+  const [pin, setPin] = useState("");
   const [nickname, setNickname] = useState("");
   const [age, setAge] = useState<(typeof AGE_GROUPS)[number]>("8-11");
+  const [kidsTotal, setKidsTotal] = useState(1);
   const [kids, setKids] = useState<Child[]>([]);
   const [kid, setKid] = useState<Child | null>(null);
   const [scriptures, setScriptures] = useState<Scripture[]>([]);
@@ -42,22 +48,61 @@ export default function App() {
   const fail = (e: unknown) =>
     setError(typeof e === "object" && e !== null && "body" in e ? JSON.stringify((e as { body: unknown }).body) : String(e));
 
-  async function doAuth(mode: "up" | "in") {
+  async function sendCode(emailAddr: string) {
+    const r = await api<{ ok: boolean; devCode?: string }>("POST", "/api/auth/request-code", { email: emailAddr });
+    setDevCode(r.devCode ?? "");
+  }
+
+  async function doSignup() {
     setError("");
     try {
-      if (mode === "up") await signUp(email.trim(), password);
-      else await signIn(email.trim(), password);
-      setScreen("addchild");
-      await loadKids();
+      await signUp(email.trim(), password);
+      await sendCode(email.trim());
+      setScreen("verify");
     } catch (e) {
       fail(e);
     }
   }
 
-  async function loadKids() {
+  async function doSignin() {
+    setError("");
     try {
-      const list = await api<Child[]>("GET", "/api/children");
-      setKids(list);
+      await signIn(email.trim(), password);
+      const me = await api<{ email: string; verified: boolean }>("GET", "/api/me");
+      if (me.verified) {
+        const list = await api<Child[]>("GET", "/api/children");
+        setKids(list);
+        setScreen(list.length ? "home" : "howmany");
+        if (list.length) setKid(list[0]);
+      } else {
+        await sendCode(email.trim());
+        setScreen("verify");
+      }
+    } catch (e) {
+      fail(e);
+    }
+  }
+
+  async function doVerify() {
+    setError("");
+    try {
+      await api("POST", "/api/auth/verify-code", { email: email.trim(), code: code.trim() });
+      await signIn(email.trim(), password);
+      setScreen("hello");
+    } catch (e) {
+      fail(e);
+    }
+  }
+
+  async function doHello() {
+    setError("");
+    if (!/^\d{4,6}$/.test(pin)) {
+      setError("PIN must be 4-6 digits");
+      return;
+    }
+    try {
+      await api("POST", "/api/parent/pin", { pin });
+      setScreen("howmany");
     } catch (e) {
       fail(e);
     }
@@ -67,8 +112,9 @@ export default function App() {
     setError("");
     try {
       const c = await api<Child>("POST", "/api/children", { nickname: nickname.trim(), age_group: age });
+      const list = [...kids, c];
+      setKids(list);
       setKid(c);
-      setKids((k) => [...k, c]);
       setNickname("");
       setScreen("soldier");
     } catch (e) {
@@ -76,10 +122,17 @@ export default function App() {
     }
   }
 
+  function soldierDone() {
+    if (kids.length < kidsTotal) setScreen("addchild");
+    else if (kid) openHome(kid);
+  }
+
   async function openHome(c: Child) {
     setKid(c);
     setResult(null);
     try {
+      const list = await api<Child[]>("GET", "/api/children");
+      setKids(list);
       const s = await api<Scripture[]>("GET", "/api/themes/sound-mind/scriptures");
       setScriptures(s);
       setScreen("home");
@@ -171,18 +224,8 @@ export default function App() {
                 <Text style={s.promiseTxt}>{p}</Text>
               </View>
             ))}
-            <Btn title="Get started" onPress={() => setScreen("who")} />
+            <Btn title="Get started" onPress={() => setScreen("signup")} />
           </View>
-        )}
-
-        {screen === "who" && (
-          <>
-            <Text style={s.h1}>Who are you?</Text>
-            <Text style={s.hint}>First screen. Determines the whole path.</Text>
-            <Btn title="I'm a parent" onPress={() => setScreen("signup")} />
-            <Btn title="I'm meditating for myself" ghost onPress={() => setScreen("signup")} />
-            <Text style={s.hint}>Children are always added by a parent.</Text>
-          </>
         )}
 
         {screen === "signup" && (
@@ -191,16 +234,52 @@ export default function App() {
             <Text style={s.hint}>Minimal fields. No child data collected here.</Text>
             <TextInput style={s.input} placeholder="Email" placeholderTextColor={C.dusk} autoCapitalize="none" value={email} onChangeText={setEmail} />
             <TextInput style={s.input} placeholder="Password (8+)" placeholderTextColor={C.dusk} secureTextEntry value={password} onChangeText={setPassword} />
-            <Btn title="Continue" onPress={() => doAuth("up")} />
-            <Btn title="I already have an account" ghost onPress={() => doAuth("in")} />
+            <Btn title="Continue" onPress={doSignup} />
+            <Btn title="I already have an account" ghost onPress={doSignin} />
             <Text style={s.hint}>No ads. No messaging. You can delete everything at any time.</Text>
           </>
+        )}
+
+        {screen === "verify" && (
+          <>
+            <Text style={s.h1}>Check your email</Text>
+            <Text style={s.hint}>We sent a 6-digit code to {email}. It lasts 15 minutes.</Text>
+            <TextInput style={s.input} placeholder="6-digit code" placeholderTextColor={C.dusk} keyboardType="number-pad" maxLength={6} value={code} onChangeText={setCode} />
+            {!!devCode && <Text style={s.hint}>Testing code: {devCode} (email sending arrives later)</Text>}
+            <Btn title="Verify" onPress={doVerify} />
+            <Btn title="Resend code" ghost onPress={() => sendCode(email.trim()).catch(fail)} />
+          </>
+        )}
+
+        {screen === "hello" && (
+          <View style={s.landing}>
+            <Text style={s.rank}>WELCOME</Text>
+            <Text style={s.h1}>Welcome to iMeditate!</Text>
+            <Text style={s.desc}>Your email is confirmed. Next: lock the parent area with a PIN, then add your children — each meets their own Soldier.</Text>
+            <TextInput style={s.input} placeholder="Parent PIN (4-6 digits)" placeholderTextColor={C.dusk} keyboardType="number-pad" maxLength={6} value={pin} onChangeText={setPin} />
+            <Btn title="Continue" onPress={doHello} />
+          </View>
+        )}
+
+        {screen === "howmany" && (
+          <View style={s.landing}>
+            <Text style={s.h1}>How many children?</Text>
+            <Text style={s.hint}>You'll add each one by name and age group.</Text>
+            <View style={s.seg}>
+              {[1, 2, 3, 4, 5].map((n) => (
+                <TouchableOpacity key={n} style={[s.segBtn, kidsTotal === n && s.segOn]} onPress={() => setKidsTotal(n)}>
+                  <Text style={s.segTxt}>{n}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <Btn title={`Add ${kidsTotal} ${kidsTotal === 1 ? "child" : "children"}`} onPress={() => setScreen("addchild")} />
+          </View>
         )}
 
         {screen === "addchild" && (
           <>
             <Text style={s.h1}>Add your child</Text>
-            <Text style={s.hint}>We only ever ask for this much.</Text>
+            <Text style={s.hint}>Child {kids.length + 1} of {kidsTotal}. We only ever ask for this much.</Text>
             <TextInput style={s.input} placeholder="First name or nickname" placeholderTextColor={C.dusk} value={nickname} onChangeText={setNickname} />
             <View style={s.seg}>
               {AGE_GROUPS.map((a) => (
@@ -210,23 +289,27 @@ export default function App() {
               ))}
             </View>
             <Btn title="Add child" onPress={doAddChild} />
-            {kids.map((k) => (
-              <KidRow key={k.id} kid={k} onPress={() => openHome(k)} />
-            ))}
           </>
         )}
 
         {screen === "soldier" && kid && (
           <>
             <Text style={s.rank}>RECRUIT</Text>
-            <Text style={s.h1}>This is your Soldier</Text>
-            <Text style={s.hint}>He grows every time you meditate, {kid.nickname}. Let's begin.</Text>
-            <Btn title="Let's go" onPress={() => openHome(kid)} />
+            <Text style={s.h1}>This is {kid.nickname}'s Soldier</Text>
+            <Text style={s.hint}>He grows every time {kid.nickname} meditates. Let's begin.</Text>
+            <Btn title={kids.length < kidsTotal ? `Next child (${kids.length + 1} of ${kidsTotal})` : "Let's go"} onPress={soldierDone} />
           </>
         )}
 
         {screen === "home" && kid && (
           <>
+            <View style={s.seg}>
+              {kids.map((k) => (
+                <TouchableOpacity key={k.id} style={[s.segBtn, kid.id === k.id && s.segOn]} onPress={() => openHome(k)}>
+                  <Text style={s.segTxt}>{k.nickname}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
             <Text style={s.rank}>{kid.soldier_rank.toUpperCase()}</Text>
             <Text style={s.h1}>Today</Text>
             {scriptures.map((x) => (
@@ -297,15 +380,6 @@ function Btn({ title, onPress, ghost }: { title: string; onPress: () => void; gh
   );
 }
 
-function KidRow({ kid, onPress }: { kid: Child; onPress: () => void }) {
-  return (
-    <TouchableOpacity style={s.kid} onPress={onPress}>
-      <Text style={s.kidName}>{kid.nickname} · {kid.age_group}</Text>
-      <Text style={s.kidRank}>{kid.soldier_rank}</Text>
-    </TouchableOpacity>
-  );
-}
-
 const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: C.navy },
   body: { padding: 24, paddingTop: 64 },
@@ -325,9 +399,6 @@ const s = StyleSheet.create({
   rank: { color: C.gold, fontWeight: "800", fontSize: 13, letterSpacing: 2 },
   card: { backgroundColor: C.navy2, borderWidth: 1, borderColor: C.line, borderRadius: 16, padding: 16, marginVertical: 6 },
   cardTitle: { color: C.parchment, fontSize: 16, fontWeight: "700" },
-  kid: { flexDirection: "row", backgroundColor: C.input, borderWidth: 1, borderColor: C.line, borderRadius: 14, padding: 12, marginVertical: 4, alignItems: "center" },
-  kidName: { color: C.parchment, fontWeight: "700" },
-  kidRank: { marginLeft: "auto", color: C.gold, fontWeight: "800", fontSize: 12 },
   steps: { flexDirection: "row", gap: 6, marginVertical: 10 },
   step: { flex: 1, padding: 8, borderRadius: 10, backgroundColor: C.input, borderWidth: 1, borderColor: C.line, alignItems: "center" },
   stepDone: { backgroundColor: C.green, borderColor: C.green },
