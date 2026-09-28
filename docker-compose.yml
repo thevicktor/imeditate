@@ -3,10 +3,12 @@ services:
     image: postgres:16-alpine
     container_name: imeditate-postgres
     restart: unless-stopped
+    env_file:
+      - ./server/.env
     environment:
-      POSTGRES_USER: imeditate
-      POSTGRES_PASSWORD: imeditate_dev_only # dev only; override in production
-      POSTGRES_DB: imeditate
+      POSTGRES_USER: ${POSTGRES_USER:-imeditate}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in server/.env}
+      POSTGRES_DB: ${POSTGRES_DB:-imeditate}
     ports:
       - "5432:5432"
     volumes:
@@ -32,7 +34,8 @@ services:
     env_file:
       - ./server/.env
     environment:
-      DATABASE_URL: postgres://imeditate:imeditate_dev_only@postgres:5432/imeditate
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-imeditate}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-imeditate}
       PORT: "3000"
       MEDIA_DIR: /app/media
     volumes:
