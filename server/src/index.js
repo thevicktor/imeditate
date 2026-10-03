@@ -199,19 +199,20 @@ app.put("/api/progress/:childId/:scriptureId", async (c) => {
   if (p instanceof Response) return p;
   const child = await ownChild(p.id, c.req.param("childId"));
   if (!child) return c.json({ error: "not found" }, 404);
-  const { stage, mutter_count } = await c.req.json();
+  const { stage, mutter_count, time_spent_seconds } = await c.req.json();
   const cur = await pool.query("SELECT stage FROM progress WHERE child_id = $1 AND scripture_id = $2", [child.id, c.req.param("scriptureId")]);
   const current = cur.rows[0]?.stage ?? "ponder";
   if (stage !== current && stage !== nextStage(current)) {
     return c.json({ error: `must advance in order (now at ${current})` }, 400);
   }
   await pool.query(
-    `INSERT INTO progress (child_id, scripture_id, stage, mutter_count)
-     VALUES ($1,$2,$3,$4) ON CONFLICT (child_id, scripture_id)
-     DO UPDATE SET stage = $3, mutter_count = $4, updated_at = now()`,
-    [child.id, c.req.param("scriptureId"), stage, mutter_count ?? 0]
+    `INSERT INTO progress (child_id, scripture_id, stage, mutter_count, time_spent_seconds)
+     VALUES ($1,$2,$3,$4,$5) ON CONFLICT (child_id, scripture_id)
+     DO UPDATE SET stage = $3, mutter_count = $4,
+       time_spent_seconds = progress.time_spent_seconds + $5, updated_at = now()`,
+    [child.id, c.req.param("scriptureId"), stage, mutter_count ?? 0, Math.max(0, Number(time_spent_seconds) || 0)]
   );
-  // Roar complete -> rank, jewels
+  // Roar complete -> rank, jewels, streak
   if (stage === "done" && current !== "done") {
     const done = await pool.query("SELECT count(*)::int AS n FROM progress WHERE child_id = $1 AND stage = 'done'", [child.id]);
     const before = await pool.query("SELECT soldier_rank FROM children WHERE id = $1", [child.id]);
@@ -219,6 +220,18 @@ app.put("/api/progress/:childId/:scriptureId", async (c) => {
     await pool.query("UPDATE children SET soldier_rank = $1 WHERE id = $2", [rank, child.id]);
     await pool.query("INSERT INTO jewel_ledger (child_id, delta, reason) VALUES ($1,$2,'scripture-complete')", [child.id, JEWELS_PER_COMPLETION]);
     await pool.query("UPDATE jewel_wallets SET balance = balance + $2 WHERE child_id = $1", [child.id, JEWELS_PER_COMPLETION]);
+    await pool.query(
+      `INSERT INTO streaks (child_id, current, longest, last_done_date)
+       VALUES ($1,1,1,CURRENT_DATE) ON CONFLICT (child_id) DO UPDATE SET
+       current = CASE WHEN streaks.last_done_date = CURRENT_DATE THEN streaks.current
+                      WHEN streaks.last_done_date = CURRENT_DATE - 1 THEN streaks.current + 1
+                      ELSE 1 END,
+       longest = GREATEST(streaks.longest, CASE WHEN streaks.last_done_date = CURRENT_DATE THEN streaks.current
+                      WHEN streaks.last_done_date = CURRENT_DATE - 1 THEN streaks.current + 1
+                      ELSE 1 END),
+       last_done_date = CURRENT_DATE`,
+      [child.id]
+    );
     return c.json({ stage, rank, promoted: promoted(done.rows[0].n - 1, done.rows[0].n), prevRank: before.rows[0].soldier_rank });
   }
   return c.json({ stage });
@@ -291,6 +304,29 @@ app.post("/api/artifacts/confirm", async (c) => {
     [child.id, scripture_id, url]
   );
   return c.json({ url, viewUrl: await presignedGet(key) }, 201);
+});
+// --- parent dashboard: one child, everything a parent may see ---
+app.get("/api/children/:id/summary", async (c) => {
+  const p = await requireVerified(c);
+  if (p instanceof Response) return p;
+  const child = await ownChild(p.id, c.req.param("id"));
+  if (!child) return c.json({ error: "not found" }, 404);
+  const info = await pool.query("SELECT id, nickname, age_group, soldier_rank FROM children WHERE id = $1", [child.id]);
+  const prog = await pool.query(
+    `SELECT p.scripture_id, s.ref, p.stage, p.mutter_count, p.time_spent_seconds, p.updated_at
+     FROM progress p JOIN scriptures s ON s.id = p.scripture_id WHERE p.child_id = $1 ORDER BY s.sort`,
+    [child.id]
+  );
+  const streak = await pool.query("SELECT current, longest, last_done_date FROM streaks WHERE child_id = $1", [child.id]);
+  const wallet = await pool.query("SELECT balance FROM jewel_wallets WHERE child_id = $1", [child.id]);
+  const week = await pool.query("SELECT COALESCE(SUM(time_spent_seconds),0)::int AS s FROM progress WHERE child_id = $1 AND updated_at > now() - interval '7 days'", [child.id]);
+  return c.json({
+    child: info.rows[0],
+    progress: prog.rows,
+    streak: streak.rows[0] ?? { current: 0, longest: 0, last_done_date: null },
+    jewels: wallet.rows[0]?.balance ?? 0,
+    minutesThisWeek: Math.round((week.rows[0]?.s ?? 0) / 60),
+  });
 });
 app.get("/api/wallet/:childId", async (c) => {
   const p = await requireVerified(c);
