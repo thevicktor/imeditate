@@ -74,8 +74,27 @@ app.post("/api/auth/request-code", async (c) => {
     [clean, code]
   );
   console.log(`verify code for ${clean}: ${code} (dev log; production sends email)`);
+  let emailed = false;
+  if (process.env.RESEND_API_KEY) {
+    try {
+      const r = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          from: process.env.EMAIL_FROM ?? "iMeditate <onboarding@resend.dev>",
+          to: [clean],
+          subject: "Your iMeditate code",
+          text: `Your iMeditate verification code is ${code}. It lasts 15 minutes.`,
+        }),
+      });
+      emailed = r.ok;
+      if (!r.ok) console.error("resend failed:", await r.text());
+    } catch (e) {
+      console.error("resend error:", e);
+    }
+  }
   const out = { ok: true };
-  if (process.env.ALLOW_DEV_CODES === "true") out.devCode = code;
+  if (process.env.ALLOW_DEV_CODES === "true" && !emailed) out.devCode = code;
   return c.json(out);
 });
 app.post("/api/auth/verify-code", async (c) => {
