@@ -65,6 +65,9 @@ export default function Home() {
               </TouchableOpacity>
             ))}
             <Btn title="Start" onPress={() => list[0] && open(list[0])} />
+            <TouchableOpacity onPress={() => router.push("/parent")}>
+              <Text style={[s.hint, { textAlign: "center", marginTop: 18 }]}>Parents →</Text>
+            </TouchableOpacity>
           </>
         )}
       </ScrollView>
