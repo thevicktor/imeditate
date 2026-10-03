@@ -175,12 +175,29 @@ app.delete("/api/children/:id", async (c) => {
   return c.json({ ok: true });
 });
 
-// --- content (read) ---
+// --- content (read; entitlement-gated, checked server-side) ---
+async function entitled(parentId, theme) {
+  if (!theme.min_entitlement) return true;
+  const { rows } = await pool.query(
+    "SELECT 1 FROM entitlements WHERE parent_id = $1 AND entitlement = $2 AND (expires_at IS NULL OR expires_at > now())",
+    [parentId, theme.min_entitlement]
+  );
+  return !!rows[0];
+}
 app.get("/api/themes", async (c) => {
-  const { rows } = await pool.query("SELECT id, title, is_free FROM themes ORDER BY id");
-  return c.json(rows);
+  const p = await requireVerified(c);
+  if (p instanceof Response) return p;
+  const { rows } = await pool.query("SELECT id, title, is_free, min_entitlement FROM themes ORDER BY id");
+  const out = [];
+  for (const t of rows) out.push({ ...t, locked: !(await entitled(p.id, t)) });
+  return c.json(out);
 });
 app.get("/api/themes/:id/scriptures", async (c) => {
+  const p = await requireVerified(c);
+  if (p instanceof Response) return p;
+  const t = await pool.query("SELECT id, min_entitlement FROM themes WHERE id = $1", [c.req.param("id")]);
+  if (!t.rows[0]) return c.json({ error: "not found" }, 404);
+  if (!(await entitled(p.id, t.rows[0]))) return c.json({ error: "locked — subscription required", locked: true }, 403);
   const { rows } = await pool.query("SELECT id, ref, text, phrases, questions, audio_url FROM scriptures WHERE theme_id = $1 ORDER BY sort", [c.req.param("id")]);
   return c.json(rows);
 });
