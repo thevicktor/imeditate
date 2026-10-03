@@ -7,9 +7,18 @@ import { useSession } from "../session";
 import type { Child, Scripture } from "../theme";
 import { Btn, errText, s } from "../ui";
 
+interface Theme {
+  id: string;
+  title: string;
+  is_free: boolean;
+  locked: boolean;
+}
+
 export default function Home() {
   const router = useRouter();
   const { kid, setKid, kids, setKids, setScriptures } = useSession();
+  const [themes, setThemes] = useState<Theme[]>([]);
+  const [theme, setTheme] = useState<Theme | null>(null);
   const [list, setList] = useState<Scripture[]>([]);
   const [error, setError] = useState("");
 
@@ -17,13 +26,20 @@ export default function Home() {
     try {
       const kl = await api<Child[]>("GET", "/api/children");
       setKids(kl);
-      if (!kid && kl[0]) setKid(kl[0]);
-      const current = kl.find((x) => x.id === kid?.id) ?? kl[0];
-      if (current) {
-        setKid(current);
-        const sc = await api<Scripture[]>("GET", "/api/themes/sound-mind/scriptures");
-        setScriptures(sc);
-        setList(sc);
+      const current = kl.find((x) => x.id === kid?.id) ?? kl[0] ?? null;
+      setKid(current);
+      const tl = await api<Theme[]>("GET", "/api/themes");
+      setThemes(tl);
+      const open = tl.find((t) => t.id === theme?.id) ?? tl.find((t) => !t.locked) ?? tl[0];
+      if (open) {
+        setTheme(open);
+        if (!open.locked) {
+          const sc = await api<Scripture[]>("GET", `/api/themes/${open.id}/scriptures`);
+          setScriptures(sc);
+          setList(sc);
+        } else {
+          setList([]);
+        }
       }
     } catch (e) {
       setError(errText(e));
@@ -65,6 +81,19 @@ export default function Home() {
               </TouchableOpacity>
             ))}
             <Btn title="Start" onPress={() => list[0] && open(list[0])} />
+            <Text style={[s.hint, { marginTop: 18 }]}>Browse themes</Text>
+            {themes.map((t) => (
+              <TouchableOpacity
+                key={t.id}
+                style={s.card}
+                onPress={() => (t.locked ? router.push("/parent") : (setTheme(t), setList([]), load()))}
+              >
+                <Text style={s.cardTitle}>
+                  {t.title} {t.locked ? "· Locked" : ""}
+                </Text>
+                <Text style={s.hint}>{t.locked ? "Ask a parent to unlock" : t.is_free ? "Free" : "Included"}</Text>
+              </TouchableOpacity>
+            ))}
             <TouchableOpacity onPress={() => router.push("/parent")}>
               <Text style={[s.hint, { textAlign: "center", marginTop: 18 }]}>Parents →</Text>
             </TouchableOpacity>
