@@ -137,7 +137,17 @@ events(id uuid pk, parent_id fk null, event text, props jsonb, created_at timest
 4.2 Entitlements + paywall (parent only): products (e.g., extra themes, rank-extension pack), sandbox-tested purchase/restore/expire; gating by `entitlements`. Acceptance: no-purchase V1 state unchanged; child can't reach paywall (automated nav test).
 4.3 Jewel economy + shop: earn jewels on completion/streak/badge (ledger reasons), spend on `shop_items` (rank-gated, equip/own), balance = ledger sum. Acceptance: double-spend impossible; history auditable.
 4.4 Streaks + badges + reminders: streak calc (timezone-safe, parent-local), badge rules engine, reminder opt-in + scheduling + disable. Acceptance: streak survives offline; badge awarded once; reminders stop on disable.
-4.5 Content expansion: new themes (content PRs only), full rank ladder art/story (General → stars → cities/continents/regions) with gentle pacing from `ranks` table. Acceptance: finishing all V1 content no longer caps progression visually.
+4.5 Content expansion + full library availability: new themes ship as content PRs only (`content/<theme>.json` → validate → load; no code changes). The catalog below is the availability contract from the PRD and parent-area design.
+
+| Theme | Availability | Status |
+|---|---|---|
+| Sound Mind | Free, no purchase | V1: 3 scriptures; grows by content PR |
+| Courage | Full-library subscription | Locked until subscribed |
+| Trusting God | Full-library subscription | Locked until subscribed |
+| Peace | Full-library subscription | Locked until subscribed |
+| Future themes | Subscription or single-pack product | Added by content PR + `products` row |
+
+Rules: `themes.min_entitlement` null = free; otherwise the API only serves a theme's scriptures when the parent holds that entitlement (checked server-side per request, never trusted from the app). A single `full-library` entitlement unlocks every current and future theme, so new themes never need app updates. In the child's world a locked theme shows a neutral locked state with a parent-gated unlock path — never prices or buy buttons (PRD §11). Rank ladder art/story extends alongside (General → stars → cities/continents/regions) with gentle pacing from the `ranks` table. Acceptance: unsubscribed parent sees Sound Mind only; subscribing unlocks all instantly; adding a theme = content PR + zero code; finishing all V1 content no longer caps progression visually.
 4.6 Pastor Chris messages: licensed clips + transcripts in `pastor_messages` (R2-hosted), dedicated player (parent area + age-appropriate surfacing TBD), license_ref displayed in-app. Acceptance: unlicensed item can't ship (CI license check).
 4.7 Full parent dashboard: per-child streaks, time spent, stage reached per scripture; export/delete; weekly summary. Acceptance: answers PRD full-plan progress questions without exposing child PII anywhere new.
 
