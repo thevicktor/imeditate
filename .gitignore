@@ -3,4 +3,5 @@ server/.env
 .env
 server/media/
 server/node_modules/
+app/dist/
 *.log
