@@ -1,18 +1,29 @@
+import { Platform } from "react-native";
 import * as SecureStore from "expo-secure-store";
 
 const BASE = process.env.EXPO_PUBLIC_API_URL ?? "http://192.168.34.214:3000";
 const TOKEN_KEY = "imeditate-session-token";
 
+// Web has no SecureStore — same API, browser storage instead.
+const store = {
+  get: (k: string) =>
+    Platform.OS === "web" ? Promise.resolve(localStorage.getItem(k)) : SecureStore.getItemAsync(k),
+  set: (k: string, v: string) =>
+    Platform.OS === "web" ? Promise.resolve(localStorage.setItem(k, v)) : SecureStore.setItemAsync(k, v),
+  del: (k: string) =>
+    Platform.OS === "web" ? Promise.resolve(localStorage.removeItem(k)) : SecureStore.deleteItemAsync(k),
+};
+
 export async function setToken(t: string) {
-  await SecureStore.setItemAsync(TOKEN_KEY, t);
+  await store.set(TOKEN_KEY, t);
 }
 export async function clearToken() {
-  await SecureStore.deleteItemAsync(TOKEN_KEY);
+  await store.del(TOKEN_KEY);
 }
 
 /** Authenticated fetch. Throws {status, body} on HTTP error. */
 export async function api<T>(method: string, path: string, body?: unknown): Promise<T> {
-  const token = await SecureStore.getItemAsync(TOKEN_KEY);
+  const token = await store.get(TOKEN_KEY);
   const res = await fetch(`${BASE}${path}`, {
     method,
     headers: {
