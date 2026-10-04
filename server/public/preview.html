@@ -48,7 +48,9 @@ canvas#pad{width:100%;height:160px;background:var(--parchment);border-radius:14p
 <div class="card"><h2>1 · Parent account</h2><p class="hint">Email + Password. Minimal data — no child info here.</p>
 <input id="email" placeholder="Email" value="parent@test.local"><input id="pw" type="password" placeholder="Password (8+)" value="testpass123">
 <div class="row"><button class="btn btn-amber" onclick="signup()">Sign up</button><button class="btn btn-ghost" onclick="signin()">Sign in</button></div>
-<p class="hint" id="me" style="margin:8px 0 0"></p></div>
+<p class="hint" id="me" style="margin:8px 0 0"></p>
+<div class="row"><input id="code" placeholder="6-digit code" maxlength="6"><button class="btn btn-amber" onclick="verify()">Verify</button></div>
+<p class="hint" id="devcode"></p></div>
 
 <div class="card"><h2>2 · Parent PIN</h2><p class="hint">Set once, then unlock. 4–6 digits.</p>
 <div class="row"><input id="pin" placeholder="1234" maxlength="6"><button class="btn btn-amber" onclick="setPin()">Set PIN</button><button class="btn btn-ghost" onclick="unlock()">Unlock</button></div></div>
@@ -77,8 +79,11 @@ const api=async(method,path,body)=>{const r=await fetch(path,{method,headers:{'C
 let age='8-11',kid=null,stage='ponder',count=0,rep=0,SCRIP='demo-courage';
 document.querySelectorAll('#ageseg button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#ageseg button').forEach(x=>x.classList.remove('on'));b.classList.add('on');age=b.dataset.a});
 fetch('/health').then(r=>r.json()).then(()=>{document.getElementById('health').className='dot ok';document.getElementById('health-t').textContent='api healthy'}).catch(()=>{document.getElementById('health').className='dot bad';document.getElementById('health-t').textContent='api down — is docker compose up?'});
-async function signup(){try{const u=await api('POST','/api/auth/sign-up/email',{name:'Parent',email:email.value,password:pw.value});document.getElementById('me').textContent='Signed up: '+u.user.email;refreshKids()}catch(e){log('ERR '+e.message)}}
-async function signin(){try{await api('POST','/api/auth/sign-in/email',{email:email.value,password:pw.value});const m=await api('GET','/api/me');document.getElementById('me').textContent='Signed in: '+m.email;refreshKids()}catch(e){log('ERR '+e.message)}}
+async function signup(){try{const u=await api('POST','/api/auth/sign-up/email',{name:'Parent',email:email.value,password:pw.value});document.getElementById('me').textContent='Signed up: '+u.user.email;await sendCode()}catch(e){log('ERR '+e.message)}}
+async function signin(){try{await api('POST','/api/auth/sign-in/email',{email:email.value,password:pw.value});const m=await api('GET','/api/me');document.getElementById('me').textContent='Signed in: '+m.email;if(m.verified){refreshKids()}else{await sendCode()}}catch(e){log('ERR '+e.message)}}
+async function sendCode(){try{const r=await api('POST','/api/auth/request-code',{email:email.value});document.getElementById('devcode').textContent=r.devCode?('Testing code: '+r.devCode):'Code sent by email — check inbox';log('code requested')}catch(e){log('ERR '+e.message)}}
+async function verify(){try{await api('POST','/api/auth/verify-code',{email:email.value,code:code.value});document.getElementById('devcode').textContent='Verified ✓ — set a PIN below, then add a child';await setPinDefault();refreshKids()}catch(e){log('ERR '+e.message)}}
+async function setPinDefault(){try{await api('POST','/api/parent/pin',{pin:'1234'});log('PIN set (1234)')}catch(e){}}
 async function setPin(){try{await api('POST','/api/parent/pin',{pin:pin.value});log('PIN set')}catch(e){log('ERR '+e.message)}}
 async function unlock(){try{await api('POST','/api/parent/unlock',{pin:pin.value});log('Unlocked — welcome to parent area')}catch(e){log('ERR '+e.message)}}
 async function addChild(){try{await api('POST','/api/children',{nickname:nick.value,age_group:age});refreshKids()}catch(e){log('ERR '+e.message)}}
