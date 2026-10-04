@@ -67,7 +67,6 @@ export default function Signup() {
         <TextInput style={s.input} placeholder="Password (8+)" placeholderTextColor="#8FA6C9" secureTextEntry value={password} onChangeText={setPassword} />
         <Btn title="Continue" onPress={doSignup} />
         <Btn title="I already have an account" ghost onPress={doSignin} />
-        <Text style={s.hint}>No ads. No messaging. You can delete everything at any time.</Text>
       </ScrollView>
     </View>
   );
